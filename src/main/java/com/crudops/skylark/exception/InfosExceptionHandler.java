@@ -24,7 +24,6 @@ public class InfosExceptionHandler {
     public ResponseEntity<Object> handleInfosValidationException(InfosValidationException exception) {
         HttpStatus status = HttpStatus.BAD_REQUEST;
 
-        // Adjust status to CONFLICT if the exception message indicates a duplicate entry
         if (exception.getMessage() != null && exception.getMessage().toLowerCase().contains("duplicate")) {
             status = HttpStatus.CONFLICT;
         }
