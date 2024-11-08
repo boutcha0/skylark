@@ -1,7 +1,10 @@
 package com.crudops.skylark.repository;
 
-import com.crudops.skylark.model.Infos;
+import com.crudops.skylark.model.Info;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface InfosRepository extends JpaRepository <Infos, String> {
+import java.util.Optional;
+
+public interface InfosRepository extends JpaRepository <Info, String> {
+    Optional<Info> findByEmail(String email);
 }

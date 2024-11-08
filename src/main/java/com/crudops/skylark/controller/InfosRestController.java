@@ -1,6 +1,6 @@
 package com.crudops.skylark.controller;
 
-import com.crudops.skylark.model.Infos;
+import com.crudops.skylark.DTO.InfosDTO;
 import com.crudops.skylark.response.ResponseHandler;
 import com.crudops.skylark.service.InfosService;
 import org.springframework.http.HttpStatus;
@@ -13,49 +13,40 @@ import java.util.List;
 @RequestMapping("/infos")
 public class InfosRestController {
 
-
-    InfosService infosService;
+    private final InfosService infosService;
 
     public InfosRestController(InfosService infosService) {
         this.infosService = infosService;
     }
 
-//List user infos from DB
-@GetMapping("{Id}")
-    public ResponseEntity<Object> getinfos(@PathVariable("Id") String Id){
-
-    return ResponseHandler.responseBuilder("Requested infos provided", HttpStatus.OK, infosService.getInfos(Id));
-
-    }
-//List All users infos from DB
-@GetMapping()
-    public List<Infos> getAllInfos(){
-
-        return  infosService.getAllInfos();
-
+    @GetMapping("{id}")
+    public ResponseEntity<Object> getInfos(@PathVariable("id") String id) {
+        InfosDTO infoDTO = infosService.getInfos(id);
+        return ResponseHandler.responseBuilder("Requested info provided", HttpStatus.OK, infoDTO);
     }
 
-@PostMapping
-    public String createInfos(@RequestBody Infos infos){
-
-        infosService.createInfos(infos);
-        return "Informations are created successfully";
-}
-
-@PutMapping
-public String updateInfos(@RequestBody Infos infos){
-
-        infosService.updateInfos(infos);
-        return "Informations are updated successfully";
+    @GetMapping
+    public ResponseEntity<Object> getAllInfos() {
+        List<InfosDTO> infosDTOs = infosService.getAllInfos();
+        return ResponseHandler.responseBuilder("All infos retrieved successfully", HttpStatus.OK, infosDTOs);
     }
 
-
-@DeleteMapping("{Id}")
-public String deleteInfos(@PathVariable("Id") String Id){
-
-        infosService.deleteInfos(Id);
-        return "Informations are deleted successfully";
+    @PostMapping
+    public ResponseEntity<Object> createInfos(@RequestBody InfosDTO infosDTO) {
+        InfosDTO createdInfo = infosService.createInfos(infosDTO);
+        return ResponseHandler.responseBuilder("Informations created successfully", HttpStatus.CREATED, createdInfo);
     }
 
+    @PutMapping("{id}")
+    public ResponseEntity<Object> updateInfos(@PathVariable("id") String id, @RequestBody InfosDTO infosDTO) {
+        infosDTO.setId(id);
+        String message = infosService.updateInfos(infosDTO);
+        return ResponseHandler.responseBuilder(message, HttpStatus.OK, infosDTO);
+    }
 
+    @DeleteMapping("{id}")
+    public ResponseEntity<Object> deleteInfos(@PathVariable("id") String id) {
+        infosService.deleteInfos(id);
+        return ResponseHandler.responseBuilder("Informations deleted successfully", HttpStatus.OK, null);
+    }
 }
