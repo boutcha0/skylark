@@ -8,19 +8,17 @@ import lombok.*;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "Informations", uniqueConstraints = {
-        @UniqueConstraint(columnNames = "id"),
-        @UniqueConstraint(columnNames = "email")
-})
+@Table(name = "Informations")
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode
 @ToString
 public class Info {
 
     @Id
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     private String name;
 
@@ -28,4 +26,41 @@ public class Info {
 
     @Column(unique = true, nullable = false)  // unique and not null
     private String email;
+
+    // Overriding equals
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Info info = (Info) o;
+        return id != null && id.equals(info.id);
+    }
+
+    // Overriding hashCode
+    @Override
+    public int hashCode() {
+        return 31 + (id != null ? id.hashCode() : 0);
+    }
+
+    @Override
+    public String toString() {
+        return "Info{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", adresse='" + adresse + '\'' +
+                ", email='" + email + '\'' +
+                '}';
+    }
+
+    public void setEmail(String email) {
+        if (email != null && !email.endsWith("@skylark.ma")) {
+            this.email = email + "@skylark.ma";
+        } else {
+            this.email = email;
+        }
+    }
+
+
+
+
 }

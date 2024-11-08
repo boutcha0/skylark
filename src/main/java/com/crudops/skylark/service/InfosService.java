@@ -8,13 +8,10 @@ import java.util.List;
 
 public interface InfosService {
 
-    public Object createInfos(Info infos) ;
-    public Object updateInfos(Info infos) ;
 
-    @Transactional
+
     InfosDTO createInfos(InfosDTO infosDTO);
 
-    @Transactional
     String updateInfos(InfosDTO infosDTO);
 
     public void deleteInfos(String Id) ;

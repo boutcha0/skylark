@@ -20,8 +20,8 @@ public class InfosRestController {
     }
 
     @GetMapping("{id}")
-    public ResponseEntity<Object> getInfos(@PathVariable("id") String id) {
-        InfosDTO infoDTO = infosService.getInfos(id);
+    public ResponseEntity<Object> getInfos(@PathVariable("id") Long id) {
+        InfosDTO infoDTO = infosService.getInfos(String.valueOf(id));
         return ResponseHandler.responseBuilder("Requested info provided", HttpStatus.OK, infoDTO);
     }
 
@@ -38,8 +38,7 @@ public class InfosRestController {
     }
 
     @PutMapping("{id}")
-    public ResponseEntity<Object> updateInfos(@PathVariable("id") String id, @RequestBody InfosDTO infosDTO) {
-        infosDTO.setId(id);
+    public ResponseEntity<Object> updateInfos(@PathVariable("id") Long id, @RequestBody InfosDTO infosDTO) {
         String message = infosService.updateInfos(infosDTO);
         return ResponseHandler.responseBuilder(message, HttpStatus.OK, infosDTO);
     }

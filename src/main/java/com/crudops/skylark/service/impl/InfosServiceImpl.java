@@ -25,40 +25,32 @@ public class InfosServiceImpl implements InfosService {
     private final InfosRepository infosRepository;
     private final InfosMapper infosMapper;
 
-    @Override
-    public Object createInfos(Info infos) {
-        return null;
-    }
-
-    @Override
-    public Object updateInfos(Info infos) {
-        return null;
-    }
 
     @Transactional
     @Override
     public InfosDTO createInfos(InfosDTO infosDTO) {
         Info info = infosMapper.toEntity(infosDTO);
 
-        if (infosRepository.existsById(info.getId())) {
-            throw new InfosValidationException("An entry with this ID already exists.");
-        }
+        // Validate email uniqueness only
         if (infosRepository.findByEmail(info.getEmail()).isPresent()) {
             throw new InfosValidationException("An entry with this email already exists.");
         }
 
+        // Save the entity; the ID will be auto-generated
         Info savedInfo = infosRepository.save(info);
         logger.info("HTTP Status: {}, Message: Info created successfully with ID: {}", HttpStatus.CREATED, savedInfo.getId());
 
+        // Convert saved entity back to DTO and return
         return infosMapper.toDto(savedInfo);
     }
+
 
     @Transactional
     @Override
     public String updateInfos(InfosDTO infosDTO) {
         Info info = infosMapper.toEntity(infosDTO);
 
-        if (!infosRepository.existsById(info.getId())) {
+        if (!infosRepository.existsById(String.valueOf(info.getId()))) {
             throw new InfosNotFoundException("Info with ID " + info.getId() + " not found.");
         }
 

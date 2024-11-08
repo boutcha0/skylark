@@ -6,7 +6,7 @@ import lombok.Data;
 @Data
 public class InfosDTO extends Info {
 
-    private String id;
+    private Long id;
     private String email;
     private String adresse;
     private String name;
