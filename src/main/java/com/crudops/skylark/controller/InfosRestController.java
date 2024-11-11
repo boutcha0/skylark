@@ -38,7 +38,7 @@ public class InfosRestController {
     }
 
     @PutMapping("{id}")
-    public ResponseEntity<Object> updateInfos(@PathVariable("id") Long id, @RequestBody InfosDTO infosDTO) {
+    public ResponseEntity<Object> updateInfos(@RequestBody InfosDTO infosDTO) {
         String message = infosService.updateInfos(infosDTO);
         return ResponseHandler.responseBuilder(message, HttpStatus.OK, infosDTO);
     }

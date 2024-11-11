@@ -13,7 +13,6 @@ import jakarta.persistence.*;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@ToString
 public class Info {
 
     @Id
