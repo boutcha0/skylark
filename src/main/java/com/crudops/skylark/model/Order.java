@@ -29,7 +29,6 @@ public class Order {
     private String status;
     private Double amount;
 
-    // Custom equals method
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -41,7 +40,6 @@ public class Order {
                 Objects.equals(amount, order.amount);
     }
 
-    // Custom hashCode method
     @Override
     public int hashCode() {
         return Objects.hash(id, orderDate, status, amount);

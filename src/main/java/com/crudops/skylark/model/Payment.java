@@ -30,7 +30,6 @@ public class Payment {
     private String paymentMethod;
     private String status;
 
-    // Custom equals method
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -43,7 +42,6 @@ public class Payment {
                 Objects.equals(status, payment.status);
     }
 
-    // Custom hashCode method
     @Override
     public int hashCode() {
         return Objects.hash(id, paymentAmount, paymentDate, paymentMethod, status);
