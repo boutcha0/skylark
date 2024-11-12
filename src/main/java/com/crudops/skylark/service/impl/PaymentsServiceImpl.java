@@ -81,4 +81,6 @@ public class PaymentsServiceImpl implements PaymentsService {
                 .orElseThrow(() -> new InfosNotFoundException("Payment with ID " + id + " not found"));
         paymentRepository.delete(payment);
     }
+
+
 }
