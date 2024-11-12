@@ -44,4 +44,14 @@ public class InfosExceptionHandler {
                 null
         );
     }
+
+    @ExceptionHandler(OrderNotFoundException.class)
+    public ResponseEntity<Object> handleOrderNotFoundException(OrderNotFoundException exception) {
+        return ResponseHandler.responseBuilder(
+                exception.getMessage(),
+                HttpStatus.NOT_FOUND,
+                null
+        );
+    }
+
 }
