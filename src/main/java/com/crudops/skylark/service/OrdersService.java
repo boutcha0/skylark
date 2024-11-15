@@ -1,6 +1,10 @@
 package com.crudops.skylark.service;
 
+import com.crudops.skylark.DTO.InvoiceDTO;
 import com.crudops.skylark.DTO.OrdersDTO;
+import com.crudops.skylark.model.Order;
+
+import java.time.LocalDate;
 import java.util.List;
 
 public interface OrdersService {
@@ -9,4 +13,7 @@ public interface OrdersService {
     List<OrdersDTO> getAllOrders();
     OrdersDTO updateOrder(Long id, OrdersDTO orderDTO);
     void deleteOrder(Long id);
+    Order getOrderByCustomerId(Long customerId);
+
+    InvoiceDTO generateInvoiceForCustomerAndDate(Long customerId, LocalDate date);
 }

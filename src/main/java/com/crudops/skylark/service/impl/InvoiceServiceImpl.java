@@ -1,79 +1,62 @@
 package com.crudops.skylark.service.impl;
 
 import com.crudops.skylark.DTO.InvoiceDTO;
-import com.crudops.skylark.exception.OrderNotFoundException;
-import com.crudops.skylark.mapper.InvoiceMapper;
 import com.crudops.skylark.model.Invoice;
 import com.crudops.skylark.model.Order;
 import com.crudops.skylark.repository.InvoiceRepository;
 import com.crudops.skylark.repository.OrdersRepository;
 import com.crudops.skylark.service.InvoiceService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import com.crudops.skylark.mapper.InvoiceMapper;
 
+import java.time.LocalDate;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class InvoiceServiceImpl implements InvoiceService {
 
     private final InvoiceRepository invoiceRepository;
-    private final OrdersRepository ordersRepository;
+    private final OrdersRepository orderRepository;
     private final InvoiceMapper invoiceMapper;
 
-    @Autowired
-    public InvoiceServiceImpl(InvoiceRepository invoiceRepository, OrdersRepository ordersRepository, InvoiceMapper invoiceMapper) {
+    public InvoiceServiceImpl(InvoiceRepository invoiceRepository, OrdersRepository orderRepository, InvoiceMapper invoiceMapper) {
         this.invoiceRepository = invoiceRepository;
-        this.ordersRepository = ordersRepository;
+        this.orderRepository = orderRepository;
         this.invoiceMapper = invoiceMapper;
     }
 
     @Override
-    public InvoiceDTO createInvoice(InvoiceDTO invoiceDTO) {
-        Order order = ordersRepository.findById(invoiceDTO.getOrderId())
-                .orElseThrow(() -> new OrderNotFoundException("Order with ID " + invoiceDTO.getOrderId() + " not found"));
-
-        Invoice invoice = invoiceMapper.toEntity(invoiceDTO, order);
-        Invoice savedInvoice = invoiceRepository.save(invoice);
-        return invoiceMapper.toDto(savedInvoice);
+    public List<Order> getOrdersByCustomerId(Long customerId) {
+        // Fetch all orders for the given customerId
+        List<Order> byCustomerId = (List<Order>) orderRepository.findByCustomerId(customerId);
+        return byCustomerId;
     }
 
     @Override
-    public InvoiceDTO getInvoiceById(Long id) {
-        Invoice invoice = invoiceRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Invoice not found with id " + id));
+    public InvoiceDTO generateInvoice(Long customerId, LocalDate invoiceDate) {
+        // Find all orders for the customer on the specified invoiceDate
+        List<Order> orders = orderRepository.findByCustomerIdAndOrderDate(customerId, invoiceDate);
+
+        // Ensure we have orders for the specified date
+        if (orders.isEmpty()) {
+            throw new IllegalArgumentException("No orders found for the specified customer and date.");
+        }
+
+        // Calculate the total amount for the invoice by summing the order amounts
+        double totalAmount = orders.stream()
+                .mapToDouble(Order::getAmount)
+                .sum();
+
+        // Create the invoice entity and set its details
+        Invoice invoice = new Invoice();
+        invoice.setCustomerId(customerId);
+        invoice.setInvoiceDate(invoiceDate);
+        invoice.setTotalAmount(totalAmount);
+
+        // Save the invoice entity to the database
+        invoice = invoiceRepository.save(invoice);
+
+        // Map the entity to DTO and return
         return invoiceMapper.toDto(invoice);
-    }
-
-    @Override
-    public List<InvoiceDTO> getAllInvoices() {
-        return invoiceRepository.findAll().stream()
-                .map(invoiceMapper::toDto)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public InvoiceDTO updateInvoice(Long id, InvoiceDTO invoiceDTO) {
-        Invoice invoice = invoiceRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Invoice not found with id " + id));
-
-        Order order = ordersRepository.findById(invoiceDTO.getOrderId())
-                .orElseThrow(() -> new RuntimeException("Order not found with id " + invoiceDTO.getOrderId()));
-
-        invoice.setOrder(order);
-        invoice.setInvoiceDate(invoiceDTO.getInvoiceDate());
-        invoice.setTotalAmount(invoiceDTO.getTotalAmount());
-        invoice.setBillingAddress(invoiceDTO.getBillingAddress());
-        invoice.setStatus(invoiceDTO.getStatus());
-
-        Invoice updatedInvoice = invoiceRepository.save(invoice);
-        return invoiceMapper.toDto(updatedInvoice);
-    }
-
-    @Override
-    public void deleteInvoice(Long id) {
-        Invoice invoice = invoiceRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Invoice not found with id " + id));
-        invoiceRepository.delete(invoice);
     }
 }

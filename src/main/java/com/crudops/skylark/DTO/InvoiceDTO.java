@@ -1,14 +1,22 @@
 package com.crudops.skylark.DTO;
 
-import lombok.Data;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import java.time.LocalDate;
 
-@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Setter
 public class InvoiceDTO {
+
     private Long id;
-    private Long orderId;
     private LocalDate invoiceDate;
-    private Double totalAmount;
-    private String billingAddress;
-    private String status;
+    private double totalAmount;
+
+    public InvoiceDTO(String s) {
+    }
 }

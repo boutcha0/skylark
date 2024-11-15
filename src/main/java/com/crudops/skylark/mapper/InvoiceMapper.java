@@ -1,8 +1,7 @@
 package com.crudops.skylark.mapper;
 
-import com.crudops.skylark.DTO.InvoiceDTO;
 import com.crudops.skylark.model.Invoice;
-import com.crudops.skylark.model.Order;
+import com.crudops.skylark.DTO.InvoiceDTO;  // Assuming you have an InvoiceDTO
 import org.springframework.stereotype.Component;
 
 @Component
@@ -11,22 +10,20 @@ public class InvoiceMapper {
     public InvoiceDTO toDto(Invoice invoice) {
         InvoiceDTO dto = new InvoiceDTO();
         dto.setId(invoice.getId());
-        dto.setOrderId(invoice.getOrder().getId());
-        dto.setInvoiceDate(invoice.getInvoiceDate());
+        dto.setInvoiceDate(invoice.getInvoiceDate());  // Correct method
         dto.setTotalAmount(invoice.getTotalAmount());
-        dto.setBillingAddress(invoice.getBillingAddress());
-        dto.setStatus(invoice.getStatus());
+        // You can also map orders if needed, but that will depend on your use case
         return dto;
     }
 
-    public Invoice toEntity(InvoiceDTO dto, Order order) {
+    public Invoice toEntity(InvoiceDTO dto) {
         Invoice invoice = new Invoice();
         invoice.setId(dto.getId());
-        invoice.setOrder(order);
-        invoice.setInvoiceDate(dto.getInvoiceDate());
+        invoice.setInvoiceDate(dto.getInvoiceDate());  // Correct method
         invoice.setTotalAmount(dto.getTotalAmount());
-        invoice.setBillingAddress(dto.getBillingAddress());
-        invoice.setStatus(dto.getStatus());
+        // Add logic to convert DTO's orders if applicable
         return invoice;
     }
+
+
 }

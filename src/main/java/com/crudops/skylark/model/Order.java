@@ -28,6 +28,10 @@ public class Order {
     private LocalDate orderDate;
     private String status;
     private Double amount;
+    @ManyToOne
+    @JoinColumn(name = "invoice_id")
+    private Invoice invoice;
+
 
     @Override
     public boolean equals(Object o) {
@@ -44,4 +48,5 @@ public class Order {
     public int hashCode() {
         return Objects.hash(id, orderDate, status, amount);
     }
+
 }

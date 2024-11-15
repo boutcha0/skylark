@@ -1,51 +1,55 @@
 package com.crudops.skylark.controller;
 
 import com.crudops.skylark.DTO.InvoiceDTO;
-import com.crudops.skylark.service.InvoiceService;
+import com.crudops.skylark.model.Order;
+import com.crudops.skylark.service.impl.InvoiceServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/invoices")
 public class InvoiceRestController {
 
-    private final InvoiceService invoiceService;
-
     @Autowired
-    public InvoiceRestController(InvoiceService invoiceService) {
-        this.invoiceService = invoiceService;
+    private InvoiceServiceImpl invoiceService;
+
+    @PostMapping("/generate")
+    public ResponseEntity<InvoiceDTO> generateInvoice(
+            @RequestParam Long customerId, @RequestParam String invoiceDate) {
+
+        try {
+            List<Order> orders = invoiceService.getOrdersByCustomerId(customerId);
+            if (orders.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(new InvoiceDTO("No orders found for this customer"));
+            }
+
+            // Logic to generate the invoice
+            InvoiceDTO invoice = generateInvoiceForOrders(orders, invoiceDate);
+
+            return ResponseEntity.ok(invoice);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new InvoiceDTO("An unexpected error occurred: " + e.getMessage()));
+        }
     }
 
-    @PostMapping
-    public ResponseEntity<InvoiceDTO> createInvoice(@RequestBody InvoiceDTO invoiceDTO) {
-        InvoiceDTO createdInvoice = invoiceService.createInvoice(invoiceDTO);
-        return ResponseEntity.ok(createdInvoice);
-    }
+    private InvoiceDTO generateInvoiceForOrders(List<Order> orders, String invoiceDate) {
+        // Example logic to process the orders and generate the invoice
+        InvoiceDTO invoiceDTO = new InvoiceDTO();
+        double totalAmount = 0;
 
-    @GetMapping("/{id}")
-    public ResponseEntity<InvoiceDTO> getInvoiceById(@PathVariable Long id) {
-        InvoiceDTO invoice = invoiceService.getInvoiceById(id);
-        return ResponseEntity.ok(invoice);
-    }
+        for (Order order : orders) {
+            totalAmount += order.getAmount(); // Summing the order amounts
+        }
 
-    @GetMapping
-    public ResponseEntity<List<InvoiceDTO>> getAllInvoices() {
-        List<InvoiceDTO> invoices = invoiceService.getAllInvoices();
-        return ResponseEntity.ok(invoices);
-    }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<InvoiceDTO> updateInvoice(@PathVariable Long id, @RequestBody InvoiceDTO invoiceDTO) {
-        InvoiceDTO updatedInvoice = invoiceService.updateInvoice(id, invoiceDTO);
-        return ResponseEntity.ok(updatedInvoice);
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteInvoice(@PathVariable Long id) {
-        invoiceService.deleteInvoice(id);
-        return ResponseEntity.noContent().build();
+        invoiceDTO.setTotalAmount(totalAmount);
+        invoiceDTO.setInvoiceDate(LocalDate.parse(invoiceDate));
+        return invoiceDTO;
     }
 }

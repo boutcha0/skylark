@@ -1,16 +1,21 @@
 package com.crudops.skylark.service.impl;
 
+import com.crudops.skylark.DTO.InvoiceDTO;
 import com.crudops.skylark.DTO.OrdersDTO;
 import com.crudops.skylark.exception.InfosNotFoundException;
+import com.crudops.skylark.exception.OrderNotFoundException;
 import com.crudops.skylark.mapper.OrdersMapper;
 import com.crudops.skylark.model.Info;
+import com.crudops.skylark.model.Invoice;
 import com.crudops.skylark.model.Order;
 import com.crudops.skylark.repository.InfosRepository;
+import com.crudops.skylark.repository.InvoiceRepository;
 import com.crudops.skylark.repository.OrdersRepository;
 import com.crudops.skylark.service.OrdersService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -20,6 +25,12 @@ public class OrdersServiceImpl implements OrdersService {
     private final OrdersRepository orderRepository;
     private final InfosRepository infoRepository;
     private final OrdersMapper orderMapper;
+
+    @Autowired
+    private OrdersRepository ordersRepository;
+
+    @Autowired
+    private InvoiceRepository invoiceRepository;
 
     @Autowired
     public OrdersServiceImpl(OrdersRepository ordersRepository, InfosRepository infosRepository, OrdersMapper ordersMapper) {
@@ -84,4 +95,41 @@ public class OrdersServiceImpl implements OrdersService {
                 .orElseThrow(() -> new InfosNotFoundException("Order with ID " + id + " not found"));
         orderRepository.delete(order);
     }
+
+    @Override
+    public Order getOrderByCustomerId(Long customerId) {
+        return orderRepository.findByCustomerId(customerId);  // Example query method
+
+    }
+
+    @Override
+    public InvoiceDTO generateInvoiceForCustomerAndDate(Long customerId, LocalDate date) {
+
+        // Retrieve all orders for the given customerId and date
+        List<Order> orders = ordersRepository.findByCustomerIdAndOrderDate(customerId, date);
+
+        // If no orders are found, throw an exception or return an empty response
+        if (orders.isEmpty()) {
+            throw new OrderNotFoundException("No orders found for customer ID " + customerId + " on " + date);
+        }
+
+        // Sum the amounts for the customer's orders on that date
+        double totalAmount = orders.stream().mapToDouble(Order::getAmount).sum();
+
+        // Create a new Invoice for this customer and date
+        Invoice invoice = new Invoice();
+        invoice.setInvoiceDate(date);
+        invoice.setTotalAmount(totalAmount);
+
+        // Optionally associate the first order or all orders with this invoice (if needed)
+        // For simplicity, associating just the first order here
+        invoice.setOrder(orders.get(0));
+
+        // Save the invoice to the database
+        Invoice savedInvoice = invoiceRepository.save(invoice);
+
+        // Return the invoice DTO
+        return new InvoiceDTO(savedInvoice.getId(), savedInvoice.getInvoiceDate(), savedInvoice.getTotalAmount());
+    }
+
 }
