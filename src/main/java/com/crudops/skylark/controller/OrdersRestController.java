@@ -41,17 +41,5 @@ public class OrdersRestController {
         return new ResponseEntity<>(orders, HttpStatus.OK);
     }
 
-    // Update an order
-    @PutMapping("/{id}")
-    public ResponseEntity<OrdersDTO> updateOrder(@PathVariable Long id, @RequestBody OrdersDTO orderDTO) {
-        OrdersDTO updatedOrder = ordersService.updateOrder(id, orderDTO);
-        return new ResponseEntity<>(updatedOrder, HttpStatus.OK);
-    }
 
-    // Delete an order
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteOrder(@PathVariable Long id) {
-        ordersService.deleteOrder(id);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-    }
 }

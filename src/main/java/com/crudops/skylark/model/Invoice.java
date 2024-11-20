@@ -1,10 +1,7 @@
 package com.crudops.skylark.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -14,20 +11,23 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Getter
+@Setter
+
 
 public class Invoice {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private LocalDate invoiceDate;
-    private Double totalAmount;
-    @Setter
+    @Column(name = "customer_id")
     private Long customerId;
 
-    @ManyToOne
-    @JoinColumn(name = "order_id")
-    private Order order;
+    @Column(name = "invoice_number", unique = true)
+    private String invoiceNumber;
+
+    @Column(name = "total_amount")
+    private Double totalAmount;
+
 
 }

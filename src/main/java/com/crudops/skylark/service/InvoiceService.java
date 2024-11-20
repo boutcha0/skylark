@@ -7,8 +7,8 @@ import java.time.LocalDate;
 import java.util.List;
 
 public interface InvoiceService {
-    List<Order> getOrdersByCustomerId(Long customerId);
+    void generateInvoicesForCompletedOrders();
 
-    InvoiceDTO generateInvoice(Long customerId, LocalDate invoiceDate);
+    List<InvoiceDTO> getInvoices();
 
 }

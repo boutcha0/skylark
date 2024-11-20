@@ -10,4 +10,5 @@ public interface PaymentsService {
     List<PaymentDTO> getAllPayments();
     PaymentDTO updatePayment(Long id, PaymentDTO paymentDTO);
     void deletePayment(Long id);
+
 }

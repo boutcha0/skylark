@@ -11,9 +11,5 @@ public interface OrdersService {
     OrdersDTO createOrder(OrdersDTO orderDTO);
     OrdersDTO getOrderById(Long id);
     List<OrdersDTO> getAllOrders();
-    OrdersDTO updateOrder(Long id, OrdersDTO orderDTO);
-    void deleteOrder(Long id);
-    Order getOrderByCustomerId(Long customerId);
 
-    InvoiceDTO generateInvoiceForCustomerAndDate(Long customerId, LocalDate date);
 }

@@ -12,11 +12,9 @@ import java.time.LocalDate;
 @Getter
 @Setter
 public class InvoiceDTO {
-
     private Long id;
-    private LocalDate invoiceDate;
-    private double totalAmount;
+    private Long customerId;
+    private String invoiceNumber;
+    private Double totalAmount;
 
-    public InvoiceDTO(String s) {
-    }
 }

@@ -4,25 +4,36 @@ import com.crudops.skylark.model.Invoice;
 import com.crudops.skylark.DTO.InvoiceDTO;  // Assuming you have an InvoiceDTO
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Component
 public class InvoiceMapper {
 
-    public InvoiceDTO toDto(Invoice invoice) {
-        InvoiceDTO dto = new InvoiceDTO();
-        dto.setId(invoice.getId());
-        dto.setInvoiceDate(invoice.getInvoiceDate());  // Correct method
-        dto.setTotalAmount(invoice.getTotalAmount());
-        // You can also map orders if needed, but that will depend on your use case
-        return dto;
+    public InvoiceDTO toDTO(Invoice invoice) {
+        InvoiceDTO invoiceDTO = new InvoiceDTO();
+        invoiceDTO.setId(invoice.getId());
+        invoiceDTO.setCustomerId(invoice.getCustomerId());
+        invoiceDTO.setInvoiceNumber(invoice.getInvoiceNumber());
+        invoiceDTO.setTotalAmount(invoice.getTotalAmount());
+        return invoiceDTO;
     }
 
-    public Invoice toEntity(InvoiceDTO dto) {
+    public Invoice toEntity(InvoiceDTO invoiceDTO) {
         Invoice invoice = new Invoice();
-        invoice.setId(dto.getId());
-        invoice.setInvoiceDate(dto.getInvoiceDate());  // Correct method
-        invoice.setTotalAmount(dto.getTotalAmount());
-        // Add logic to convert DTO's orders if applicable
+        invoice.setId(invoiceDTO.getId());
+        invoice.setCustomerId(invoiceDTO.getCustomerId());
+        invoice.setInvoiceNumber(invoiceDTO.getInvoiceNumber());
+        invoice.setTotalAmount(invoiceDTO.getTotalAmount());
         return invoice;
+    }
+
+    public List<InvoiceDTO> toDTOList(List<Invoice> invoices) {
+        return invoices.stream().map(this::toDTO).collect(Collectors.toList());
+    }
+
+    public List<Invoice> toEntityList(List<InvoiceDTO> invoiceDTOs) {
+        return invoiceDTOs.stream().map(this::toEntity).collect(Collectors.toList());
     }
 
 

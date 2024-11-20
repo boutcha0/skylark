@@ -1,10 +1,7 @@
 package com.crudops.skylark.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 
 import java.time.LocalDate;
 import java.util.Objects;
@@ -15,22 +12,26 @@ import java.util.Objects;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
+@Getter
+@Setter
 public class Order {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "customer_id", nullable = false)
-    private Info customer;
-
-    private LocalDate orderDate;
-    private String status;
     private Double amount;
-    @ManyToOne
-    @JoinColumn(name = "invoice_id")
-    private Invoice invoice;
+
+    @Column(name = "order_date")
+    private LocalDate orderDate;
+
+    private String status;
+
+    @Column(name = "customer_id")
+    private Long customerId;
+
+    @Column(name = "invoice_id", nullable = true)
+    private Long invoiceId; // Links this order to an invoice
+
 
 
     @Override
