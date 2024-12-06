@@ -23,5 +23,5 @@ public interface OrdersRepository extends JpaRepository<Order, Long> {
 
     Order findByCustomerId(Long customerId);
 
-    List<Order> findByCustomerIdAndOrderDate(Long customerId, LocalDate date);
+
 }

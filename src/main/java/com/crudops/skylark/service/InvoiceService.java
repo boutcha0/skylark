@@ -11,4 +11,7 @@ public interface InvoiceService {
 
     List<InvoiceDTO> getInvoices();
 
+    byte[] generateInvoicePdf(Long invoiceId) throws Exception;
+
+
 }

@@ -30,4 +30,20 @@ public class InvoiceRestController {
         invoiceService.generateInvoicesForCompletedOrders();
         return ResponseEntity.ok("Invoices generated successfully!");
     }
+
+
+    @GetMapping("/download/{invoiceId}")
+    public ResponseEntity<?> downloadInvoicePdf(@PathVariable Long invoiceId) {
+        try {
+            byte[] pdfData = invoiceService.generateInvoicePdf(invoiceId);
+            return ResponseEntity.ok()
+                    .header("Content-Disposition", "attachment; filename=invoice-" + invoiceId + ".pdf")
+                    .contentType(org.springframework.http.MediaType.APPLICATION_PDF)
+                    .body(pdfData);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error generating PDF: " + e.getMessage());
+        }
+    }
+
 }
