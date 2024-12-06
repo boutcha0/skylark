@@ -27,3 +27,4 @@ public class SkylarkApplication {
 					.allowCredentials(true);
 		}
 }}
+
