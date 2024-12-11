@@ -51,15 +51,4 @@ public class Info {
                 '}';
     }
 
-    public void setEmail(String email) {
-        if (email != null && !email.endsWith("@skylark.ma")) {
-            this.email = email + "@skylark.ma";
-        } else {
-            this.email = email;
-        }
-    }
-
-
-
-
 }

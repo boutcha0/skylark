@@ -95,4 +95,11 @@ public class InfosServiceImpl implements InfosService {
 
         return allInfos.stream().map(infosMapper::toDto).collect(Collectors.toList());
     }
+
+    @Override
+    public InfosDTO getInfosByEmail(String email) {
+        Info info = infosRepository.findByEmail(email)
+                .orElseThrow(() -> new InfosNotFoundException("No user found with email: " + email));
+        return infosMapper.toDto(info);
+    }
 }

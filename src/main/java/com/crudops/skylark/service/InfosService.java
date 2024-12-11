@@ -17,4 +17,7 @@ public interface InfosService {
     public void deleteInfos(String Id) ;
     public InfosDTO getInfos(String Id) ;
     public List<InfosDTO> getAllInfos() ;
+    InfosDTO getInfosByEmail(String email);
+
+
 }
