@@ -6,7 +6,4 @@ public class InfosNotFoundException extends RuntimeException {
         super(message);
     }
 
-    public InfosNotFoundException(String message, Throwable cause) {
-        super(message, cause);
-    }
 }

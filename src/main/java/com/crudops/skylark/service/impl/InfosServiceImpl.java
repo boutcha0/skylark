@@ -9,9 +9,7 @@ import com.crudops.skylark.repository.InfosRepository;
 import com.crudops.skylark.service.InfosService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,85 +19,98 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class InfosServiceImpl implements InfosService {
 
-    private static final Logger logger = LoggerFactory.getLogger(InfosServiceImpl.class);
     private final InfosRepository infosRepository;
     private final InfosMapper infosMapper;
-
+    private final PasswordEncoder passwordEncoder;
 
     @Transactional
     @Override
     public InfosDTO createInfos(InfosDTO infosDTO) {
-        Info info = infosMapper.toEntity(infosDTO);
-
-        // Validate email uniqueness only
-        if (infosRepository.findByEmail(info.getEmail()).isPresent()) {
+        if (infosRepository.findByEmail(infosDTO.getEmail()).isPresent()) {
             throw new InfosValidationException("An entry with this email already exists.");
         }
 
-        // Save the entity; the ID will be auto-generated
+        Info info = infosMapper.toEntity(infosDTO);
+        info.setPassword(passwordEncoder.encode(infosDTO.getPassword()));
+
         Info savedInfo = infosRepository.save(info);
-        logger.info("HTTP Status: {}, Message: Info created successfully with ID: {}", HttpStatus.CREATED, savedInfo.getId());
-
-        // Convert saved entity back to DTO and return
-        return infosMapper.toDto(savedInfo);
+        InfosDTO savedInfoDto = infosMapper.toDto(savedInfo);
+        savedInfoDto.setPassword(null);
+        return savedInfoDto;
     }
-
 
     @Transactional
     @Override
     public String updateInfos(InfosDTO infosDTO) {
-        Info info = infosMapper.toEntity(infosDTO);
+        Info existingInfo = infosRepository.findById(String.valueOf(infosDTO.getId()))
+                .orElseThrow(() -> new InfosNotFoundException("Info with ID " + infosDTO.getId() + " not found."));
 
-        if (!infosRepository.existsById(String.valueOf(info.getId()))) {
-            throw new InfosNotFoundException("Info with ID " + info.getId() + " not found.");
-        }
-
-        infosRepository.findByEmail(info.getEmail()).ifPresent(existingInfo -> {
-            if (!existingInfo.getId().equals(info.getId())) {
+        infosRepository.findByEmail(infosDTO.getEmail()).ifPresent(info -> {
+            if (!info.getId().equals(existingInfo.getId())) {
                 throw new InfosValidationException("An entry with this email already exists.");
             }
         });
 
-        infosRepository.save(info);
-        logger.info("HTTP Status: {}, Message: Informations updated successfully for ID: {}", HttpStatus.OK, info.getId());
+        existingInfo.setEmail(infosDTO.getEmail());
+        existingInfo.setName(infosDTO.getName());
+        existingInfo.setAdresse(infosDTO.getAdresse());
 
+        if (infosDTO.getPassword() != null && !infosDTO.getPassword().isEmpty()) {
+            existingInfo.setPassword(passwordEncoder.encode(infosDTO.getPassword()));
+        }
+
+        infosRepository.save(existingInfo);
         return "Informations are updated successfully";
+    }
+
+    @Override
+    public InfosDTO getInfosById(Long id) {
+        Info info = infosRepository.findById(String.valueOf(id))
+                .orElseThrow(() -> new InfosNotFoundException("Info with ID " + id + " not found."));
+
+        InfosDTO infosDTO = infosMapper.toDto(info);
+        infosDTO.setPassword(null); // Do not return password in DTO
+        return infosDTO;
+    }
+
+    @Override
+    public List<InfosDTO> getAllInfos() {
+        List<Info> infos = infosRepository.findAll();
+        return infos.stream()
+                .map(info -> {
+                    InfosDTO infosDTO = infosMapper.toDto(info);
+                    infosDTO.setPassword(null); // Do not return password in DTO
+                    return infosDTO;
+                })
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
+    @Override
+    public String deleteInfosById(Long id) {
+        Info existingInfo = infosRepository.findById(String.valueOf(id))
+                .orElseThrow(() -> new InfosNotFoundException("Info with ID " + id + " not found."));
+
+        infosRepository.delete(existingInfo);
+        return "Info with ID " + id + " has been deleted successfully";
+    }
+
+    @Override
+    public InfosDTO getInfos(String id) {
+        Info info = infosRepository.findById(id)
+                .orElseThrow(() -> new InfosNotFoundException("Info with ID " + id + " not found."));
+
+        InfosDTO infosDTO = infosMapper.toDto(info);
+        infosDTO.setPassword(null); // Do not return password in DTO
+        return infosDTO;
     }
 
     @Transactional
     @Override
     public void deleteInfos(String id) {
-        if (!infosRepository.existsById(id)) {
-            throw new InfosNotFoundException("Info with ID " + id + " not found.");
-        }
+        Info existingInfo = infosRepository.findById(id)
+                .orElseThrow(() -> new InfosNotFoundException("Info with ID " + id + " not found."));
 
-        infosRepository.deleteById(id);
-        logger.info("HTTP Status: {}, Message: Info deleted successfully with ID: {}", HttpStatus.OK, id);
-    }
-
-    @Transactional
-    @Override
-    public InfosDTO getInfos(String id) {
-        Info info = infosRepository.findById(id)
-                .orElseThrow(() -> new InfosNotFoundException("Requested information does not exist."));
-        logger.info("HTTP Status: {}, Message: Info retrieved successfully for ID: {}", HttpStatus.OK, id);
-
-        return infosMapper.toDto(info);
-    }
-
-    @Transactional
-    @Override
-    public List<InfosDTO> getAllInfos() {
-        List<Info> allInfos = infosRepository.findAll();
-        logger.info("HTTP Status: {}, Message: All infos retrieved successfully", HttpStatus.OK);
-
-        return allInfos.stream().map(infosMapper::toDto).collect(Collectors.toList());
-    }
-
-    @Override
-    public InfosDTO getInfosByEmail(String email) {
-        Info info = infosRepository.findByEmail(email)
-                .orElseThrow(() -> new InfosNotFoundException("No user found with email: " + email));
-        return infosMapper.toDto(info);
+        infosRepository.delete(existingInfo);
     }
 }

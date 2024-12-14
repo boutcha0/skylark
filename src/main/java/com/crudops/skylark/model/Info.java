@@ -23,6 +23,9 @@ public class Info {
 
     private String adresse;
 
+    @Column(nullable = false)
+    private String password;
+
     @Column(unique = true, nullable = false)  // unique and not null
     private String email;
 
@@ -48,6 +51,7 @@ public class Info {
                 ", name='" + name + '\'' +
                 ", adresse='" + adresse + '\'' +
                 ", email='" + email + '\'' +
+                ", password='" + password + '\'' +
                 '}';
     }
 

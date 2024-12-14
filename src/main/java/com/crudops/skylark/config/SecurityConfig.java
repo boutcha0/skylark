@@ -2,13 +2,67 @@ package com.crudops.skylark.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
-public class PasswordEncoder {
-    @Bean
+@EnableWebSecurity
+public class SecurityConfig implements WebMvcConfigurer {
 
-    public BCryptPasswordEncoder passwordEncoder() {
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+
+    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
+        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+    }
+
+    // CORS Configuration (can be done in both places)
+    @Override
+    public void addCorsMappings(CorsRegistry registry) {
+        registry.addMapping("/api/**") // Allow access to all API endpoints
+                .allowedOrigins("http://localhost:3000") // Frontend address
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                .allowedHeaders("*")
+                .allowCredentials(true);
+    }
+
+    // Main Security Configuration
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http
+                .csrf(csrf -> csrf.disable()) // Disable CSRF for stateless API
+                .authorizeRequests(auth -> auth
+                        .requestMatchers("/api/auth/login", "/api/auth/logout" ,"/api/auth/register").permitAll() // Allow login and registration
+                        .requestMatchers("/api/products/**").permitAll()
+                        .requestMatchers("/api/payments/create-payment-intent").permitAll() // Public endpoints (optional)
+                        .anyRequest().authenticated() // All other requests require authentication
+                )
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS) // Stateless API (no session)
+                )
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class) // JWT filter
+                .cors(); // Enable CORS for Spring Security
+
+        return http.build();
+    }
+
+    // Password Encoder (for encoding passwords)
+    @Bean
+    public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    // Authentication Manager Bean
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
+        return authenticationConfiguration.getAuthenticationManager();
     }
 }

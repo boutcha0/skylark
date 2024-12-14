@@ -1,7 +1,7 @@
 package com.crudops.skylark.controller;
 
 import com.crudops.skylark.DTO.PaymentRequest;
-import com.crudops.skylark.service.PaymentsService;
+import com.crudops.skylark.service.impl.PaymentService;
 import com.crudops.skylark.service.impl.PaymentService;
 import com.stripe.exception.StripeException;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -14,10 +14,16 @@ public interface InfosService {
 
     String updateInfos(InfosDTO infosDTO);
 
-    public void deleteInfos(String Id) ;
-    public InfosDTO getInfos(String Id) ;
-    public List<InfosDTO> getAllInfos() ;
-    InfosDTO getInfosByEmail(String email);
+
+    InfosDTO getInfosById(Long id);
+
+    List<InfosDTO> getAllInfos();
 
 
+    @Transactional
+    String deleteInfosById(Long id);
+
+    InfosDTO getInfos(String id);
+
+     void deleteInfos(String id);
 }

@@ -34,7 +34,6 @@ public class Order {
     @Column(name = "invoice_id", nullable = true)
     private Long invoiceId; // Links this order to an invoice
 
-    private boolean isBasket;
 
     @ManyToMany
     @JoinTable(
