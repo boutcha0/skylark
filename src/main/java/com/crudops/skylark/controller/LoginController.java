@@ -99,15 +99,13 @@ public class LoginController {
         if (token != null && token.startsWith("Bearer ")) {
             token = token.substring(7); // Remove "Bearer " prefix
 
-            // Check if the token is already blacklisted
             if (tokenBlacklistService.isBlacklisted(token)) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", "Token already logged out"));
             }
 
-            // Blacklist the token
             tokenBlacklistService.addToBlacklist(token);
 
-            // Optionally clear the authentication context
+            //  clear the authentication context
             SecurityContextHolder.clearContext();
 
             return ResponseEntity.ok(Map.of("message", "Logout successful"));

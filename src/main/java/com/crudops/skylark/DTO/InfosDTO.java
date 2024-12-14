@@ -8,8 +8,7 @@ public class InfosDTO extends Info {
 
     private Long id;
     private String email;
-    private String password;  // Include password in DTO
-
+    private String password;
     private String adresse;
     private String name;
 }

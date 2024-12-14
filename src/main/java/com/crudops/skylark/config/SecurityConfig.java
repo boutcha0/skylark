@@ -31,18 +31,18 @@ public class SecurityConfig implements WebMvcConfigurer {
                 .allowedOrigins("http://localhost:3000") // Frontend address
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
+                .exposedHeaders("Authorization")
                 .allowCredentials(true);
     }
 
-    // Main Security Configuration
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf.disable()) // Disable CSRF for stateless API
                 .authorizeRequests(auth -> auth
-                        .requestMatchers("/api/auth/login", "/api/auth/logout" ,"/api/auth/register").permitAll() // Allow login and registration
+                        .requestMatchers("/api/auth/login", "/api/auth/logout" ,"/api/auth/register").permitAll()
                         .requestMatchers("/api/products/**").permitAll()
-                        .requestMatchers("/api/payments/create-payment-intent").permitAll() // Public endpoints (optional)
+                        .requestMatchers("/api/payments/create-payment-intent").permitAll()
                         .anyRequest().authenticated() // All other requests require authentication
                 )
                 .sessionManagement(session -> session

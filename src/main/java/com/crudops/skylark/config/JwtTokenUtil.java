@@ -30,7 +30,6 @@ public class JwtTokenUtil {
         this.tokenBlacklistService = tokenBlacklistService;
     }
 
-    // Generate token for user
     public String generateToken(String username) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("unique_session_id", UUID.randomUUID().toString());
@@ -38,7 +37,6 @@ public class JwtTokenUtil {
         return createToken(claims, username);
     }
 
-    // Create token with claims
     private String createToken(Map<String, Object> claims, String subject) {
         return Jwts.builder()
                 .setClaims(claims)
@@ -49,15 +47,12 @@ public class JwtTokenUtil {
                 .compact();
     }
 
-    // Get signing key
     private Key getSignKey() {
         byte[] keyBytes = jwtSecret.getBytes();
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    // Validate token
     public boolean validateToken(String token, String username) {
-        // Check if token is blacklisted
         if (tokenBlacklistService.isBlacklisted(token)) {
             return false;
         }
@@ -65,29 +60,24 @@ public class JwtTokenUtil {
         return (tokenUsername.equals(username) && !isTokenExpired(token));
     }
 
-    // Extract username from token
     public String getUsernameFromToken(String token) {
         return getClaimFromToken(token, Claims::getSubject);
     }
 
-    // Check if token is expired
     public boolean isTokenExpired(String token) {
         final Date expiration = getExpirationDateFromToken(token);
         return expiration.before(new Date());
     }
 
-    // Get expiration date from token
     public Date getExpirationDateFromToken(String token) {
         return getClaimFromToken(token, Claims::getExpiration);
     }
 
-    // Generic method to extract claim
     public <T> T getClaimFromToken(String token, Function<Claims, T> claimsResolver) {
         final Claims claims = getAllClaimsFromToken(token);
         return claimsResolver.apply(claims);
     }
 
-    // Extract all claims
     private Claims getAllClaimsFromToken(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(getSignKey())

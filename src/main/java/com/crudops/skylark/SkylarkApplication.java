@@ -24,6 +24,7 @@ public class SkylarkApplication {
 					.allowedOrigins("http://localhost:3000")
 					.allowedMethods("GET", "POST", "PUT", "DELETE")
 					.allowedHeaders("*")
+					.exposedHeaders("Authorization")
 					.allowCredentials(true);
 		}
 }}
