@@ -27,8 +27,8 @@ public class SecurityConfig implements WebMvcConfigurer {
     // CORS Configuration (can be done in both places)
     @Override
     public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/api/**") // Allow access to all API endpoints
-                .allowedOrigins("http://localhost:3000") // Frontend address
+        registry.addMapping("/api/**")
+                .allowedOrigins("http://localhost:3000")
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
                 .exposedHeaders("Authorization")
@@ -41,20 +41,20 @@ public class SecurityConfig implements WebMvcConfigurer {
                 .csrf(csrf -> csrf.disable()) // Disable CSRF for stateless API
                 .authorizeRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/order-items/**","/api/orders/**","/api/order-items/by-product/{productId}").permitAll()
                         .requestMatchers("/api/products/**").permitAll()
                         .requestMatchers("/api/payments/**").permitAll()
-                        .anyRequest().authenticated() // All other requests require authentication
+                        .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS) // Stateless API (no session)
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class) // JWT filter
-                .cors(); // Enable CORS for Spring Security
+                .cors();
 
         return http.build();
     }
 
-    // Password Encoder (for encoding passwords)
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();

@@ -1,2 +1,13 @@
-package com.crudops.skylark.exception;public class ErrorResponse {
+package com.crudops.skylark.exception;
+
+public class ErrorResponse {
+    private String message;
+
+    public ErrorResponse(String message) {
+        this.message = message;
+    }
+
+    public String getMessage() {
+        return message;
+    }
 }
