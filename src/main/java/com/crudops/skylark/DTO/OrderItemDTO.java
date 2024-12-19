@@ -1,17 +1,12 @@
 package com.crudops.skylark.DTO;
 
-import lombok.*;
+import lombok.Data;
 
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@ToString
+@Data
 public class OrderItemDTO {
     private Long id;
     private Long productId;
-    private String productName;
     private Integer quantity;
     private Double unitPrice;
-    private Double totalPrice;
+    private Double totalAmount;
 }

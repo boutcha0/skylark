@@ -18,8 +18,7 @@ public class InfosExceptionHandler {
         );
     }
 
-
-
+     
     @ExceptionHandler(InfosValidationException.class)
     public ResponseEntity<Object> handleInfosValidationException(InfosValidationException exception) {
         HttpStatus status = HttpStatus.BAD_REQUEST;

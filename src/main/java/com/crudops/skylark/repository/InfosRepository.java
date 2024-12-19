@@ -7,5 +7,4 @@ import java.util.Optional;
 
 public interface InfosRepository extends JpaRepository <Info, String> {
     Optional<Info> findByEmail(String email);
-    Info findFirstByOrderById();
 }

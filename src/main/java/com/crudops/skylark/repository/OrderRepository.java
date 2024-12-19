@@ -1,12 +1,11 @@
 package com.crudops.skylark.repository;
 
-import com.crudops.skylark.model.OrderItem;
+import com.crudops.skylark.model.Order;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-
 import java.util.List;
 
 @Repository
-public interface OrderItemRepository extends JpaRepository<OrderItem, Long> {
-    List<OrderItem> findByOrderId(Long orderId);
+public interface OrderRepository extends JpaRepository<Order, Long> {
+    List<Order> findByInfoId(Long infoId);
 }
