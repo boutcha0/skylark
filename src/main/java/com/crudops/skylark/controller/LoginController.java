@@ -42,9 +42,12 @@ public class LoginController {
 
         if (isLoginValid) {
             String token = jwtTokenUtil.generateToken(loginRequest.getEmail());
-            return ResponseEntity.ok(new LoginResponse(token, "Login successful"));
+            Long userId = infosServiceImpl.getIdByEmail(loginRequest.getEmail()); // Retrieve the user's ID
+
+            return ResponseEntity.ok(new LoginResponse(token, "Login successful", userId));
         } else {
-            return ResponseEntity.status(401).body(new LoginResponse(null, "Invalid credentials"));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new LoginResponse(null, "Invalid credentials", null));
         }
     }
 
@@ -54,31 +57,43 @@ public class LoginController {
         try {
             InfosDTO createdUser = infosServiceImpl.createInfos(infosDTO);
             String token = jwtTokenUtil.generateToken(createdUser.getEmail());
-            return ResponseEntity.ok(new LoginResponse(token, "Registration successful"));
+            Long userId = infosServiceImpl.getIdByEmail(createdUser.getEmail()); // Retrieve the user's ID
+
+            return ResponseEntity.ok(new LoginResponse(token, "Registration successful", userId));
         } catch (InfosValidationException e) {
-            return ResponseEntity.badRequest().body(new LoginResponse(null, e.getMessage()));
+            return ResponseEntity.badRequest()
+                    .body(new LoginResponse(null, e.getMessage(), null));
         }
     }
 
     // 3. Validate Token Endpoint
     @GetMapping("/validate")
     public ResponseEntity<?> validateToken(HttpServletRequest request) {
-        String token = request.getHeader("Authorization").substring(7);
+        String token = extractToken(request);
+
+        if (token == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", "Invalid token"));
+        }
+
         try {
-            boolean isValid = jwtTokenUtil.validateToken(token,
-                    jwtTokenUtil.getUsernameFromToken(token));
+            boolean isValid = jwtTokenUtil.validateToken(token, jwtTokenUtil.getUsernameFromToken(token));
             return isValid
-                    ? ResponseEntity.ok().build()
+                    ? ResponseEntity.ok().body(Map.of("message", "Token is valid"))
                     : ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Token validation failed"));
         }
     }
 
     // 4. Refresh Token Endpoint
     @PostMapping("/refresh")
     public ResponseEntity<?> refreshToken(HttpServletRequest request) {
-        String token = request.getHeader("Authorization").substring(7);
+        String token = extractToken(request);
+
+        if (token == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", "Invalid token"));
+        }
+
         try {
             String username = jwtTokenUtil.getUsernameFromToken(token);
             if (jwtTokenUtil.validateToken(token, username)) {
@@ -86,7 +101,8 @@ public class LoginController {
                 return ResponseEntity.ok(Map.of("token", newToken));
             }
         } catch (Exception e) {
-            // Handle token refresh failure
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "Token refresh failed"));
         }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
@@ -94,23 +110,28 @@ public class LoginController {
     // 5. Logout Endpoint
     @PostMapping("/logout")
     public ResponseEntity<?> logout(HttpServletRequest request) {
-        String token = request.getHeader("Authorization");
+        String token = extractToken(request);
 
-        if (token != null && token.startsWith("Bearer ")) {
-            token = token.substring(7); // Remove "Bearer " prefix
-
-            if (tokenBlacklistService.isBlacklisted(token)) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", "Token already logged out"));
-            }
-
-            tokenBlacklistService.addToBlacklist(token);
-
-            //  clear the authentication context
-            SecurityContextHolder.clearContext();
-
-            return ResponseEntity.ok(Map.of("message", "Logout successful"));
-        } else {
+        if (token == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", "Invalid token"));
         }
+
+        if (tokenBlacklistService.isBlacklisted(token)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("error", "Token already logged out"));
+        }
+
+        tokenBlacklistService.addToBlacklist(token);
+
+        // Clear the authentication context
+        SecurityContextHolder.clearContext();
+
+        return ResponseEntity.ok(Map.of("message", "Logout successful"));
+    }
+
+    // Helper method to extract token from the request
+    private String extractToken(HttpServletRequest request) {
+        String token = request.getHeader("Authorization");
+        return (token != null && token.startsWith("Bearer ")) ? token.substring(7) : null;
     }
 }

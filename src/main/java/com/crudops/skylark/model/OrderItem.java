@@ -27,15 +27,14 @@ public class OrderItem {
     private Double totalAmount;
 
     @Column(name = "total_price", nullable = false)
-    private Double totalPrice; // Added this field to match database schema
+    private Double totalPrice;
 
-    // Helper method to calculate total price
     @PrePersist
     @PreUpdate
     public void calculateTotals() {
         if (quantity != null && unitPrice != null) {
             this.totalAmount = quantity * unitPrice;
-            this.totalPrice = this.totalAmount; // Set total_price same as totalAmount
+            this.totalPrice = this.totalAmount;
         }
     }
 }

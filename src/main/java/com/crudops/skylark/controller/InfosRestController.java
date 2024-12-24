@@ -48,4 +48,11 @@ public class InfosRestController {
         infosService.deleteInfos(id);
         return ResponseHandler.responseBuilder("Informations deleted successfully", HttpStatus.OK, null);
     }
+
+    @GetMapping("/id")
+    public ResponseEntity<Object> getIdByEmail(@RequestParam("email") String email) {
+        Long id = infosService.getIdByEmail(email);
+        return ResponseHandler.responseBuilder("ID retrieved successfully", HttpStatus.OK, id);
+    }
+
 }

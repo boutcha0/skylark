@@ -30,10 +30,20 @@ public class JwtTokenUtil {
         this.tokenBlacklistService = tokenBlacklistService;
     }
 
+    // Basic token generation with just username
     public String generateToken(String username) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("unique_session_id", UUID.randomUUID().toString());
         claims.put("user_email", username);
+        return createToken(claims, username);
+    }
+
+    // Token generation with username and userId
+    public String generateTokenWithId(String username, Long userId) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("unique_session_id", UUID.randomUUID().toString());
+        claims.put("user_email", username);
+        claims.put("id", userId);
         return createToken(claims, username);
     }
 
@@ -47,6 +57,15 @@ public class JwtTokenUtil {
                 .compact();
     }
 
+    public Long getUserIdFromToken(String token) {
+        final Claims claims = getAllClaimsFromToken(token);
+        return claims.get("id", Long.class);
+    }
+
+    public String getUsernameFromToken(String token) {
+        return getClaimFromToken(token, Claims::getSubject);
+    }
+
     private Key getSignKey() {
         byte[] keyBytes = jwtSecret.getBytes();
         return Keys.hmacShaKeyFor(keyBytes);
@@ -58,10 +77,6 @@ public class JwtTokenUtil {
         }
         final String tokenUsername = getUsernameFromToken(token);
         return (tokenUsername.equals(username) && !isTokenExpired(token));
-    }
-
-    public String getUsernameFromToken(String token) {
-        return getClaimFromToken(token, Claims::getSubject);
     }
 
     public boolean isTokenExpired(String token) {

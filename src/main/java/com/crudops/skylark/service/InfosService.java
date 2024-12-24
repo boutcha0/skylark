@@ -26,4 +26,7 @@ public interface InfosService {
     InfosDTO getInfos(String id);
 
      void deleteInfos(String id);
+
+    @Transactional
+    Long getIdByEmail(String email);
 }

@@ -113,4 +113,13 @@ public class InfosServiceImpl implements InfosService {
 
         infosRepository.delete(existingInfo);
     }
+
+    @Transactional
+    @Override
+    public Long getIdByEmail(String email) {
+        Info info = infosRepository.findByEmail(email)
+                .orElseThrow(() -> new InfosNotFoundException("Info with email " + email + " not found."));
+        return Long.parseLong(String.valueOf(info.getId()));
+    }
+
 }

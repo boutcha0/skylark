@@ -16,7 +16,6 @@ import java.util.stream.Collectors;
 @Service
 public class OrderServiceImpl implements OrderService {
     private final OrderRepository orderRepository;
-    private final OrderItemRepository orderItemRepository;
     private final InfosRepository infoRepository;
     private final ProductRepository productRepository;
     private final OrderMapper orderMapper;
@@ -27,7 +26,6 @@ public class OrderServiceImpl implements OrderService {
                             ProductRepository productRepository,
                             OrderMapper orderMapper) {
         this.orderRepository = orderRepository;
-        this.orderItemRepository = orderItemRepository;
         this.infoRepository = infoRepository;
         this.productRepository = productRepository;
         this.orderMapper = orderMapper;
@@ -57,7 +55,7 @@ public class OrderServiceImpl implements OrderService {
             orderItem.setQuantity(itemDTO.getQuantity());
             orderItem.setUnitPrice(product.getPrice());
             orderItem.setTotalAmount(product.getPrice() * itemDTO.getQuantity());
-            orderItem.setTotalPrice(product.getPrice() * itemDTO.getQuantity()); // Set total_price
+            orderItem.setTotalPrice(product.getPrice() * itemDTO.getQuantity());
 
             orderItems.add(orderItem);
             totalAmount += orderItem.getTotalAmount();
@@ -69,6 +67,7 @@ public class OrderServiceImpl implements OrderService {
         Order savedOrder = orderRepository.save(order);
         return orderMapper.toDTO(savedOrder);
     }
+
     @Override
     public OrderDTO getOrderById(Long id) {
         Order order = orderRepository.findById(id)
@@ -102,4 +101,5 @@ public class OrderServiceImpl implements OrderService {
     public void deleteOrder(Long id) {
         orderRepository.deleteById(id);
     }
+
 }

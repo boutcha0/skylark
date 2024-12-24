@@ -41,9 +41,10 @@ public class SecurityConfig implements WebMvcConfigurer {
                 .csrf(csrf -> csrf.disable()) // Disable CSRF for stateless API
                 .authorizeRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/infos/id").authenticated()
                         .requestMatchers("/api/order-items/**","/api/orders/**").permitAll()
                         .requestMatchers("/api/products/**").permitAll()
-                        .requestMatchers("/api/payments/**").permitAll()
+                        .requestMatchers("/api/payments/**","/api/stripe/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session

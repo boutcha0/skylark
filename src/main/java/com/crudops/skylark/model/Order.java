@@ -25,5 +25,5 @@ public class Order {
 
     private LocalDateTime orderDate;
     private Double totalAmount;
-    private String status; // PENDING, CONFIRMED, SHIPPED, DELIVERED, etc.
+    private String status;
 }
