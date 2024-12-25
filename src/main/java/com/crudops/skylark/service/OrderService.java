@@ -9,4 +9,6 @@ public interface OrderService {
     List<OrderDTO> getOrdersByInfoId(Long infoId);
     OrderDTO updateOrder(Long id, OrderDTO orderDTO);
     void deleteOrder(Long id);
+
+    void syncOrderToStripe(Long orderId);
 }

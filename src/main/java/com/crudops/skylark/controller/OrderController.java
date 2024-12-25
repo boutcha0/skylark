@@ -45,4 +45,11 @@ public class OrderController {
         orderService.deleteOrder(id);
         return ResponseEntity.noContent().build();
     }
+
+    @PostMapping("/{id}/sync")
+    public ResponseEntity<Void> syncOrderToStripe(@PathVariable Long id) {
+        orderService.syncOrderToStripe(id);
+        return ResponseEntity.ok().build();
+    }
+
 }

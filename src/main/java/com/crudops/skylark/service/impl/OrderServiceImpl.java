@@ -6,6 +6,9 @@ import com.crudops.skylark.model.*;
 import com.crudops.skylark.repository.*;
 import com.crudops.skylark.mapper.OrderMapper;
 import com.crudops.skylark.service.OrderService;
+import com.stripe.model.Price;
+import com.stripe.param.PriceCreateParams;
+import com.stripe.param.ProductCreateParams;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
@@ -100,6 +103,39 @@ public class OrderServiceImpl implements OrderService {
     @Transactional
     public void deleteOrder(Long id) {
         orderRepository.deleteById(id);
+    }
+
+
+    @Transactional
+    public void syncOrderToStripe(Long orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+
+        // Create a Stripe Product for the order
+        ProductCreateParams productParams = ProductCreateParams.builder()
+                .setName("Order #" + order.getId())
+                .setDescription("Order details for user ID: " + order.getInfo().getId())
+                .putMetadata("orderId", order.getId().toString())
+                .putMetadata("userId", order.getInfo().getId().toString())
+                .build();
+
+        try {
+            com.stripe.model.Product stripeProduct = com.stripe.model.Product.create(productParams);
+
+            // Create a Stripe Price for each order item
+            for (OrderItem orderItem : order.getOrderItems()) {
+                PriceCreateParams priceParams = PriceCreateParams.builder()
+                        .setUnitAmount((long) (orderItem.getUnitPrice() * 100)) // Convert to cents
+                        .setCurrency("usd")
+                        .setProduct(String.valueOf(stripeProduct.getId()))
+                        .setNickname(orderItem.getProduct().getName() + " x " + orderItem.getQuantity())
+                        .build();
+
+                Price.create(priceParams);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Error syncing order to Stripe: " + e.getMessage(), e);
+        }
     }
 
 }
