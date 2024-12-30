@@ -14,4 +14,6 @@ public class OrderDTO {
     private LocalDateTime orderDate;
     private Double totalAmount;
     private String status;
+    private ShippingAddressDTO shippingAddress;
+
 }

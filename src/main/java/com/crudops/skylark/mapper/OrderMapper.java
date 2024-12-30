@@ -2,6 +2,7 @@ package com.crudops.skylark.mapper;
 
 import com.crudops.skylark.DTO.OrderDTO;
 import com.crudops.skylark.DTO.OrderItemDTO;
+import com.crudops.skylark.DTO.ShippingAddressDTO;
 import com.crudops.skylark.model.Order;
 import com.crudops.skylark.model.OrderItem;
 import org.springframework.stereotype.Component;
@@ -24,6 +25,17 @@ public class OrderMapper {
                 .map(this::toOrderItemDTO)
                 .collect(Collectors.toList());
         dto.setOrderItems(orderItemDTOs);
+
+        if (order.getShippingAddress() != null) {
+            ShippingAddressDTO addressDTO = new ShippingAddressDTO();
+            addressDTO.setId(order.getShippingAddress().getId());
+            addressDTO.setStreetAddress(order.getShippingAddress().getStreetAddress());
+            addressDTO.setCity(order.getShippingAddress().getCity());
+            addressDTO.setState(order.getShippingAddress().getState());
+            addressDTO.setPostalCode(order.getShippingAddress().getPostalCode());
+            addressDTO.setCountry(order.getShippingAddress().getCountry());
+            dto.setShippingAddress(addressDTO);
+        }
 
         return dto;
     }

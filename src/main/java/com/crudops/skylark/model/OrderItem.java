@@ -29,6 +29,8 @@ public class OrderItem {
     @Column(name = "total_price", nullable = false)
     private Double totalPrice;
 
+
+
     @PrePersist
     @PreUpdate
     public void calculateTotals() {

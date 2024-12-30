@@ -26,4 +26,8 @@ public class Order {
     private LocalDateTime orderDate;
     private Double totalAmount;
     private String status;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "shipping_address_id")
+    private ShippingAddress shippingAddress;
 }

@@ -67,6 +67,18 @@ public class OrderServiceImpl implements OrderService {
         order.setOrderItems(orderItems);
         order.setTotalAmount(totalAmount);
 
+        if (orderDTO.getShippingAddress() != null) {
+            ShippingAddress address = new ShippingAddress();
+            address.setStreetAddress(orderDTO.getShippingAddress().getStreetAddress());
+            address.setCity(orderDTO.getShippingAddress().getCity());
+            address.setState(orderDTO.getShippingAddress().getState());
+            address.setPostalCode(orderDTO.getShippingAddress().getPostalCode());
+            address.setCountry(orderDTO.getShippingAddress().getCountry());
+            address.setOrder(order);
+            order.setShippingAddress(address);
+        }
+
+
         Order savedOrder = orderRepository.save(order);
         return orderMapper.toDTO(savedOrder);
     }
@@ -93,7 +105,6 @@ public class OrderServiceImpl implements OrderService {
                 .orElseThrow(() -> new RuntimeException("Order not found"));
 
         order.setStatus(orderDTO.getStatus());
-        // Update other fields as needed
 
         Order updatedOrder = orderRepository.save(order);
         return orderMapper.toDTO(updatedOrder);
@@ -111,7 +122,6 @@ public class OrderServiceImpl implements OrderService {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Order not found"));
 
-        // Create a Stripe Product for the order
         ProductCreateParams productParams = ProductCreateParams.builder()
                 .setName("Order #" + order.getId())
                 .setDescription("Order details for user ID: " + order.getInfo().getId())
@@ -122,10 +132,9 @@ public class OrderServiceImpl implements OrderService {
         try {
             com.stripe.model.Product stripeProduct = com.stripe.model.Product.create(productParams);
 
-            // Create a Stripe Price for each order item
             for (OrderItem orderItem : order.getOrderItems()) {
                 PriceCreateParams priceParams = PriceCreateParams.builder()
-                        .setUnitAmount((long) (orderItem.getUnitPrice() * 100)) // Convert to cents
+                        .setUnitAmount((long) (orderItem.getUnitPrice() * 100))
                         .setCurrency("usd")
                         .setProduct(String.valueOf(stripeProduct.getId()))
                         .setNickname(orderItem.getProduct().getName() + " x " + orderItem.getQuantity())
