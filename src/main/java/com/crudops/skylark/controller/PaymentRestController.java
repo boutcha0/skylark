@@ -1,7 +1,12 @@
 package com.crudops.skylark.controller;
 
-import com.crudops.skylark.DTO.InvoiceRequest;
+import com.crudops.skylark.DTO.InfosDTO;
+import com.crudops.skylark.DTO.OrderDTO;
+import com.crudops.skylark.DTO.OrderItemDTO;
 import com.crudops.skylark.DTO.PaymentRequest;
+import com.crudops.skylark.model.*;
+import com.crudops.skylark.service.InfosService;
+import com.crudops.skylark.service.OrderService;
 import com.crudops.skylark.service.impl.PaymentService;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfWriter;
@@ -10,28 +15,23 @@ import com.itextpdf.layout.element.Paragraph;
 import com.itextpdf.layout.element.Table;
 import com.itextpdf.layout.property.TextAlignment;
 import com.itextpdf.layout.property.UnitValue;
-
 import com.stripe.exception.StripeException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.ByteArrayOutputStream;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 @RestController
 @RequestMapping("/api/payments")
+@RequiredArgsConstructor
 public class PaymentRestController {
     private final PaymentService paymentService;
-
-    public PaymentRestController(PaymentService paymentService) {
-        this.paymentService = paymentService;
-    }
+    private final OrderService orderService;
+    private final InfosService infosService;
 
     @PostMapping("/create-payment-intent")
     public ResponseEntity<String> createPaymentIntent(@RequestBody PaymentRequest request) {
@@ -43,66 +43,96 @@ public class PaymentRestController {
         }
     }
 
-    @PostMapping("/generate-invoice")
-    public  ResponseEntity<byte[]> generateInvoice(@RequestBody InvoiceRequest invoiceRequest) {
+    @PostMapping("/generate-invoice/{orderId}")
+    public ResponseEntity<byte[]> generateInvoice(@PathVariable Long orderId) {
         try {
-            // Create a byte array output stream to hold the PDF
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            OrderDTO order = orderService.getOrderById(orderId);
+            InfosDTO customerInfo = infosService.getInfosById(order.getInfoId());
 
-            // Create PDF writer and document
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
             PdfWriter writer = new PdfWriter(baos);
             PdfDocument pdf = new PdfDocument(writer);
             Document document = new Document(pdf);
 
-            // Add Invoice Header
+            document.add(new Paragraph("SKYLARK")
+                    .setTextAlignment(TextAlignment.CENTER)
+                    .setFontSize(24)
+                    .setBold());
+
             document.add(new Paragraph("Invoice")
                     .setTextAlignment(TextAlignment.CENTER)
                     .setFontSize(20)
                     .setBold());
 
-            // Invoice Details
-            document.add(new Paragraph("Invoice Date: " +
-                    LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME))
+            String invoiceNumber = "INV-" + orderId + "-" +
+                    order.getOrderDate().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
+            document.add(new Paragraph("Invoice Number: " + invoiceNumber)
                     .setTextAlignment(TextAlignment.RIGHT));
 
-            document.add(new Paragraph("Customer ID: " + invoiceRequest.getCustomerId())
-                    .setTextAlignment(TextAlignment.LEFT));
+            document.add(new Paragraph("Invoice Date: " +
+                    order.getOrderDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")))
+                    .setTextAlignment(TextAlignment.RIGHT));
 
-            // Create a table for line items
-            Table table = new Table(UnitValue.createPercentArray(new float[]{70, 30}));
+            document.add(new Paragraph("Customer Details")
+                    .setFontSize(14)
+                    .setBold());
+            document.add(new Paragraph("Customer ID: " + customerInfo.getId()));
+            document.add(new Paragraph("Name: " + customerInfo.getName()));
+            document.add(new Paragraph("Email: " + customerInfo.getEmail()));
+
+            // Shipping Address
+            if (order.getShippingAddress() != null) {
+                document.add(new Paragraph("Shipping Address:")
+                        .setFontSize(12)
+                        .setBold());
+                document.add(new Paragraph(String.format("%s\n%s, %s\n%s, %s",
+                        order.getShippingAddress().getStreetAddress(),
+                        order.getShippingAddress().getCity(),
+                        order.getShippingAddress().getState(),
+                        order.getShippingAddress().getPostalCode(),
+                        order.getShippingAddress().getCountry())));
+            }
+
+            Table table = new Table(UnitValue.createPercentArray(new float[]{40, 15, 15, 30}));
             table.setWidth(UnitValue.createPercentValue(100));
+            table.setMarginTop(20);
 
-            // Add table headers
-            table.addHeaderCell("Description");
-            table.addHeaderCell("Amount");
+            table.addHeaderCell("Item Description");
+            table.addHeaderCell("Quantity");
+            table.addHeaderCell("Price");
+            table.addHeaderCell("Total");
 
-            // Add line item
-            table.addCell("Total Purchase");
-            table.addCell("$" + invoiceRequest.getTotalPrice());
+            for (OrderItemDTO item : order.getOrderItems()) {
+                table.addCell(item.getProductId().toString()); // Item Description
+                table.addCell(String.valueOf(item.getQuantity()));
+                table.addCell("$" + String.format("%.2f", item.getUnitPrice()));
+                table.addCell("$" + String.format("%.2f", item.getTotalAmount()));
+            }
 
             document.add(table);
 
-            // Add total
-            document.add(new Paragraph("Total Amount: $" + invoiceRequest.getTotalPrice())
+            document.add(new Paragraph("").setMarginTop(10));
+
+            document.add(new Paragraph("Total Amount: $" + String.format("%.2f", order.getTotalAmount()))
                     .setTextAlignment(TextAlignment.RIGHT)
                     .setFontSize(16)
                     .setBold());
 
-            // Close document
-            document.close();
+            document.add(new Paragraph("Order Status: " + order.getStatus())
+                    .setTextAlignment(TextAlignment.LEFT)
+                    .setMarginTop(20));
 
-            // Prepare response
-            byte[] invoiceBytes = baos.toByteArray();
+            document.add(new Paragraph("Thank you for shopping with SKYLARK!")
+                    .setTextAlignment(TextAlignment.CENTER)
+                    .setMarginTop(50));
+
+            document.close();
 
             return ResponseEntity.ok()
                     .header(HttpHeaders.CONTENT_DISPOSITION,
-                            "attachment; filename=invoice-" +
-                                    invoiceRequest.getCustomerId() +
-                                    "-" +
-                                    LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss")) +
-                                    ".pdf")
+                            "attachment; filename=" + invoiceNumber + ".pdf")
                     .contentType(MediaType.APPLICATION_PDF)
-                    .body(invoiceBytes);
+                    .body(baos.toByteArray());
 
         } catch (Exception e) {
             return ResponseEntity.badRequest()

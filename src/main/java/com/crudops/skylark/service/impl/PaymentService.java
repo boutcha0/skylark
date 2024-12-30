@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 public class PaymentService {
     public String createPaymentIntent(PaymentRequest request) throws StripeException {
         PaymentIntentCreateParams params = PaymentIntentCreateParams.builder()
-                .setAmount((long) (request.getAmount() * 100L)) // Amount in cents
+                .setAmount((long) (request.getAmount())) // Amount in cents
                 .setCurrency("usd")
                 .build();
 
