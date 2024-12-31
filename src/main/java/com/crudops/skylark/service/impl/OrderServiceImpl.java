@@ -43,7 +43,7 @@ public class OrderServiceImpl implements OrderService {
 
         order.setInfo(info);
         order.setOrderDate(LocalDateTime.now());
-        order.setStatus("PENDING");
+        order.setStatus("PAID");
 
         List<OrderItem> orderItems = new ArrayList<>();
         double totalAmount = 0.0;
@@ -80,6 +80,7 @@ public class OrderServiceImpl implements OrderService {
 
 
         Order savedOrder = orderRepository.save(order);
+        syncOrderToStripe(savedOrder.getId());
         return orderMapper.toDTO(savedOrder);
     }
 
@@ -145,6 +146,33 @@ public class OrderServiceImpl implements OrderService {
         } catch (Exception e) {
             throw new RuntimeException("Error syncing order to Stripe: " + e.getMessage(), e);
         }
+    }
+
+    @Override
+    public OrderDTO calculateOrder(OrderDTO orderDTO) {
+        List<OrderItemDTO> calculatedItems = new ArrayList<>();
+        double totalAmount = 0.0;
+
+        for (OrderItemDTO itemDTO : orderDTO.getOrderItems()) {
+            Product product = productRepository.findById(itemDTO.getProductId())
+                    .orElseThrow(() -> new RuntimeException("Product not found"));
+
+            double unitPrice = product.getPrice();
+            double itemTotal = unitPrice * itemDTO.getQuantity();
+
+            OrderItemDTO calculatedItem = new OrderItemDTO();
+            calculatedItem.setProductId(itemDTO.getProductId());
+            calculatedItem.setQuantity(itemDTO.getQuantity());
+            calculatedItem.setUnitPrice(unitPrice);
+            calculatedItem.setTotalAmount(itemTotal);
+
+            calculatedItems.add(calculatedItem);
+            totalAmount += itemTotal;
+        }
+
+        orderDTO.setOrderItems(calculatedItems);
+        orderDTO.setTotalAmount(totalAmount);
+        return orderDTO;
     }
 
 }

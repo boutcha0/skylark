@@ -55,6 +55,11 @@ public class OrderController {
         return ResponseEntity.ok().build();
     }
 
+    @PostMapping("/calculate")
+    public OrderDTO calculateOrder(@RequestBody OrderDTO orderDTO) {
+        return orderService.calculateOrder(orderDTO);
+    }
+
 
 
 

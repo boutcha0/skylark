@@ -11,4 +11,6 @@ public interface OrderService {
     void deleteOrder(Long id);
 
     void syncOrderToStripe(Long orderId);
+
+    OrderDTO calculateOrder(OrderDTO orderDTO);
 }
