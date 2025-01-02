@@ -124,7 +124,7 @@ public class OrderServiceImpl implements OrderService {
                 .orElseThrow(() -> new RuntimeException("Order not found"));
 
         ProductCreateParams productParams = ProductCreateParams.builder()
-                .setName("Order #" + order.getId())
+                .setName("Order " + order.getId())
                 .setDescription("Order details for user ID: " + order.getInfo().getId())
                 .putMetadata("orderId", order.getId().toString())
                 .putMetadata("userId", order.getInfo().getId().toString())
