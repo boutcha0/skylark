@@ -1,6 +1,8 @@
 package com.crudops.skylark.controller;
 
 import com.crudops.skylark.DTO.OrderDTO;
+import com.crudops.skylark.model.Order;
+import com.crudops.skylark.repository.OrderRepository;
 import com.crudops.skylark.service.OrderService;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -14,9 +16,11 @@ import java.util.List;
 @RequestMapping("/api/orders")
 public class OrderController {
     private final OrderService orderService;
+    private final OrderRepository orderRepository;
 
-    public OrderController(OrderService orderService) {
+    public OrderController(OrderService orderService, OrderRepository orderRepository) {
         this.orderService = orderService;
+        this.orderRepository = orderRepository;
     }
 
     @PostMapping
@@ -51,7 +55,9 @@ public class OrderController {
 
     @PostMapping("/{id}/sync")
     public ResponseEntity<Void> syncOrderToStripe(@PathVariable Long id) {
-        orderService.syncOrderToStripe(id);
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+        orderService.syncOrderToStripe(order);
         return ResponseEntity.ok().build();
     }
 

@@ -2,6 +2,7 @@ package com.crudops.skylark.service.impl;
 
 import com.crudops.skylark.DTO.OrderDTO;
 import com.crudops.skylark.DTO.OrderItemDTO;
+import com.crudops.skylark.DTO.ShippingAddressDTO;
 import com.crudops.skylark.model.*;
 import com.crudops.skylark.repository.*;
 import com.crudops.skylark.mapper.OrderMapper;
@@ -58,7 +59,6 @@ public class OrderServiceImpl implements OrderService {
             orderItem.setQuantity(itemDTO.getQuantity());
             orderItem.setUnitPrice(product.getPrice());
             orderItem.setTotalAmount(product.getPrice() * itemDTO.getQuantity());
-            orderItem.setTotalPrice(product.getPrice() * itemDTO.getQuantity());
 
             orderItems.add(orderItem);
             totalAmount += orderItem.getTotalAmount();
@@ -68,19 +68,12 @@ public class OrderServiceImpl implements OrderService {
         order.setTotalAmount(totalAmount);
 
         if (orderDTO.getShippingAddress() != null) {
-            ShippingAddress address = new ShippingAddress();
-            address.setStreetAddress(orderDTO.getShippingAddress().getStreetAddress());
-            address.setCity(orderDTO.getShippingAddress().getCity());
-            address.setState(orderDTO.getShippingAddress().getState());
-            address.setPostalCode(orderDTO.getShippingAddress().getPostalCode());
-            address.setCountry(orderDTO.getShippingAddress().getCountry());
-            address.setOrder(order);
-            order.setShippingAddress(address);
+            order.setShippingAddress(createShippingAddress(orderDTO.getShippingAddress(), order));
         }
 
 
         Order savedOrder = orderRepository.save(order);
-        syncOrderToStripe(savedOrder.getId());
+        syncOrderToStripe(order);
         return orderMapper.toDTO(savedOrder);
     }
 
@@ -118,26 +111,24 @@ public class OrderServiceImpl implements OrderService {
     }
 
 
+    @Override
     @Transactional
-    public void syncOrderToStripe(Long orderId) {
-        Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new RuntimeException("Order not found"));
-
-        ProductCreateParams productParams = ProductCreateParams.builder()
-                .setName("Order " + order.getId())
-                .setDescription("Order details for user ID: " + order.getInfo().getId())
-                .putMetadata("orderId", order.getId().toString())
-                .putMetadata("userId", order.getInfo().getId().toString())
-                .build();
-
+    public void syncOrderToStripe(Order order) {
         try {
+            ProductCreateParams productParams = ProductCreateParams.builder()
+                    .setName("Order " + order.getId())
+                    .setDescription("Order details for user ID: " + order.getInfo().getId())
+                    .putMetadata("orderId", order.getId().toString())
+                    .putMetadata("userId", order.getInfo().getId().toString())
+                    .build();
+
             com.stripe.model.Product stripeProduct = com.stripe.model.Product.create(productParams);
 
             for (OrderItem orderItem : order.getOrderItems()) {
                 PriceCreateParams priceParams = PriceCreateParams.builder()
                         .setUnitAmount((long) (orderItem.getUnitPrice() * 100))
                         .setCurrency("usd")
-                        .setProduct(String.valueOf(stripeProduct.getId()))
+                        .setProduct(stripeProduct.getId())
                         .setNickname(orderItem.getProduct().getName() + " x " + orderItem.getQuantity())
                         .build();
 
@@ -174,5 +165,18 @@ public class OrderServiceImpl implements OrderService {
         orderDTO.setTotalAmount(totalAmount);
         return orderDTO;
     }
+
+    @Override
+    public ShippingAddress createShippingAddress(ShippingAddressDTO addressDTO, Order order) {
+        ShippingAddress address = new ShippingAddress();
+        address.setStreetAddress(addressDTO.getStreetAddress());
+        address.setCity(addressDTO.getCity());
+        address.setState(addressDTO.getState());
+        address.setPostalCode(addressDTO.getPostalCode());
+        address.setCountry(addressDTO.getCountry());
+        address.setOrder(order);
+        return address;
+    }
+
 
 }
