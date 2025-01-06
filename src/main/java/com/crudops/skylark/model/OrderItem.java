@@ -28,17 +28,11 @@ public class OrderItem {
     private Double unitPrice;
     private Double totalAmount;
 
-
-    @Column(name = "total_price", nullable = false)
-    private Double totalPrice;
-
-
     @PrePersist
     @PreUpdate
     public void calculateTotals() {
         if (quantity != null && unitPrice != null) {
             this.totalAmount = quantity * unitPrice;
-            this.totalPrice = this.totalAmount;
         }
         if (product != null) {
             this.productName = product.getName();
