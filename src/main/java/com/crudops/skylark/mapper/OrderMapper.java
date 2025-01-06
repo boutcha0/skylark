@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.stream.Collectors;
 
+
 @Component
 public class OrderMapper {
 
@@ -44,6 +45,8 @@ public class OrderMapper {
         OrderItemDTO dto = new OrderItemDTO();
         dto.setId(orderItem.getId());
         dto.setProductId(orderItem.getProduct().getId());
+        dto.setProductName(orderItem.getProduct().getName());
+        dto.setProductImage(orderItem.getProduct().getImage());
         dto.setQuantity(orderItem.getQuantity());
         dto.setUnitPrice(orderItem.getUnitPrice());
         dto.setTotalAmount(orderItem.getTotalAmount());

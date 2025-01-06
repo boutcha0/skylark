@@ -21,14 +21,16 @@ public class OrderItem {
     @ManyToOne
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;
+    private String productName;
+    private String productImage;
 
     private Integer quantity;
     private Double unitPrice;
     private Double totalAmount;
 
+
     @Column(name = "total_price", nullable = false)
     private Double totalPrice;
-
 
 
     @PrePersist
@@ -37,6 +39,10 @@ public class OrderItem {
         if (quantity != null && unitPrice != null) {
             this.totalAmount = quantity * unitPrice;
             this.totalPrice = this.totalAmount;
+        }
+        if (product != null) {
+            this.productName = product.getName();
+            this.productImage = product.getImage();
         }
     }
 }
