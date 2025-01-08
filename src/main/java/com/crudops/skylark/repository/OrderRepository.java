@@ -1,6 +1,8 @@
 package com.crudops.skylark.repository;
 
 import com.crudops.skylark.model.Order;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -18,10 +20,10 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             "AND (:startDate IS NULL OR o.orderDate >= :startDate) " +
             "AND (:endDate IS NULL OR o.orderDate <= :endDate) " +
             "ORDER BY o.orderDate DESC")
-    List<Order> findFilteredOrders(
+    Page<Order> findFilteredOrdersWithPagination(
             @Param("infoId") Long infoId,
             @Param("orderId") String orderId,
             @Param("startDate") LocalDateTime startDate,
-            @Param("endDate") LocalDateTime endDate
-    );
+            @Param("endDate") LocalDateTime endDate,
+            Pageable pageable);
 }

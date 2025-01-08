@@ -10,6 +10,8 @@ import com.crudops.skylark.service.OrderService;
 import com.stripe.model.Price;
 import com.stripe.param.PriceCreateParams;
 import com.stripe.param.ProductCreateParams;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
@@ -181,12 +183,11 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<OrderDTO> getFilteredOrders(Long infoId, String orderId, LocalDateTime startDate, LocalDateTime endDate) {
-        List<Order> orders = orderRepository.findFilteredOrders(infoId, orderId, startDate, endDate);
-        return orders.stream()
-                .map(orderMapper::toDTO)
-                .collect(Collectors.toList());
+    public Page<OrderDTO> getFilteredOrders(Long infoId, String orderId, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable) {
+        Page<Order> orders = orderRepository.findFilteredOrdersWithPagination(infoId, orderId, startDate, endDate, pageable);
+        return orders.map(orderMapper::toDTO);
     }
+
 
 
 }

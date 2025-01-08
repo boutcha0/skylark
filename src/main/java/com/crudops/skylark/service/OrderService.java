@@ -24,7 +24,7 @@ public interface OrderService {
 
     ShippingAddress createShippingAddress(ShippingAddressDTO addressDTO, Order order);
 
-
     @Transactional(readOnly = true)
-    List<OrderDTO> getFilteredOrders(Long infoId, String orderId, LocalDateTime startDate, LocalDateTime endDate);
+    Page<OrderDTO> getFilteredOrders(Long infoId, String orderId, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
+
 }
