@@ -4,12 +4,15 @@ import com.crudops.skylark.DTO.OrderDTO;
 import com.crudops.skylark.model.Order;
 import com.crudops.skylark.repository.OrderRepository;
 import com.crudops.skylark.service.OrderService;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -36,10 +39,22 @@ public class OrderController {
     }
 
     @GetMapping("/info/{infoId}")
-    public ResponseEntity<List<OrderDTO>> getOrdersByInfo(@PathVariable Long infoId) {
-        List<OrderDTO> orders = orderService.getOrdersByInfoId(infoId);
+    public ResponseEntity<List<OrderDTO>> getOrdersByInfo(
+            @PathVariable Long infoId,
+            @RequestParam(required = false) String orderId,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate
+
+    ) {
+
+        LocalDateTime startDateTime = startDate != null ? startDate.atStartOfDay() : null;
+        LocalDateTime endDateTime = endDate != null ? endDate.atTime(23, 59, 59) : null;
+
+        List<OrderDTO> orders = orderService.getFilteredOrders(infoId, orderId, startDateTime, endDateTime);
         return ResponseEntity.ok(orders);
     }
+
+
 
     @PutMapping("/{id}")
     public ResponseEntity<OrderDTO> updateOrder(@PathVariable Long id, @RequestBody OrderDTO orderDTO) {

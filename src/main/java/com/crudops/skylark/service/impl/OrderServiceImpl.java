@@ -179,4 +179,14 @@ public class OrderServiceImpl implements OrderService {
     }
 
 
+    @Override
+    @Transactional(readOnly = true)
+    public List<OrderDTO> getFilteredOrders(Long infoId, String orderId, LocalDateTime startDate, LocalDateTime endDate) {
+        List<Order> orders = orderRepository.findFilteredOrders(infoId, orderId, startDate, endDate);
+        return orders.stream()
+                .map(orderMapper::toDTO)
+                .collect(Collectors.toList());
+    }
+
+
 }
