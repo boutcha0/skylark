@@ -3,6 +3,7 @@ package com.crudops.skylark.service.impl;
 import com.crudops.skylark.DTO.OrderDTO;
 import com.crudops.skylark.DTO.OrderItemDTO;
 import com.crudops.skylark.DTO.ShippingAddressDTO;
+import com.crudops.skylark.exception.OrderNotFoundException;
 import com.crudops.skylark.model.*;
 import com.crudops.skylark.repository.*;
 import com.crudops.skylark.mapper.OrderMapper;
@@ -82,7 +83,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public OrderDTO getOrderById(Long id) {
         Order order = orderRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Order not found"));
+                .orElseThrow(() -> new OrderNotFoundException("Order not found with id: " + id));
         return orderMapper.toDTO(order);
     }
 

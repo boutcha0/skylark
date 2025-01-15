@@ -9,7 +9,7 @@ import java.util.List;
 @Setter
 @Getter
 public class InvoiceRequest {
-    // Getters and Setters
+
     private String customerId;
     private BigDecimal totalPrice;
     private List<OrderItemDTO> orderItems;

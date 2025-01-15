@@ -1,6 +1,7 @@
 package com.crudops.skylark.controller;
 
 import com.crudops.skylark.DTO.OrderDTO;
+import com.crudops.skylark.exception.OrderNotFoundException;
 import com.crudops.skylark.model.Order;
 import com.crudops.skylark.repository.OrderRepository;
 import com.crudops.skylark.service.OrderService;
@@ -36,11 +37,17 @@ public class OrderController {
         return ResponseEntity.ok(createdOrder);
     }
 
+
     @GetMapping("/{id}")
     public ResponseEntity<OrderDTO> getOrder(@PathVariable Long id) {
-        OrderDTO order = orderService.getOrderById(id);
-        return ResponseEntity.ok(order);
+        try {
+            OrderDTO order = orderService.getOrderById(id);
+            return ResponseEntity.ok(order);
+        } catch (OrderNotFoundException e) {
+            throw e; // Let the exception handler deal with it
+        }
     }
+
 
     @GetMapping("/info/{infoId}")
     public ResponseEntity<Page<OrderDTO>> getOrdersByInfo(
