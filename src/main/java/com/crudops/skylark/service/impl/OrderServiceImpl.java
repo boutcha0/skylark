@@ -7,6 +7,7 @@ import com.crudops.skylark.exception.OrderNotFoundException;
 import com.crudops.skylark.model.*;
 import com.crudops.skylark.repository.*;
 import com.crudops.skylark.mapper.OrderMapper;
+import com.crudops.skylark.service.EmailService;
 import com.crudops.skylark.service.OrderService;
 import com.stripe.model.Price;
 import com.stripe.param.PriceCreateParams;
@@ -26,16 +27,19 @@ public class OrderServiceImpl implements OrderService {
     private final InfosRepository infoRepository;
     private final ProductRepository productRepository;
     private final OrderMapper orderMapper;
+    private final EmailService emailService;
+
 
     public OrderServiceImpl(OrderRepository orderRepository,
                             OrderItemRepository orderItemRepository,
                             InfosRepository infoRepository,
                             ProductRepository productRepository,
-                            OrderMapper orderMapper) {
+                            OrderMapper orderMapper,EmailService emailService) {
         this.orderRepository = orderRepository;
         this.infoRepository = infoRepository;
         this.productRepository = productRepository;
         this.orderMapper = orderMapper;
+        this.emailService = emailService;
     }
 
     @Override
@@ -77,6 +81,8 @@ public class OrderServiceImpl implements OrderService {
 
         Order savedOrder = orderRepository.save(order);
         syncOrderToStripe(order);
+
+        emailService.sendOrderConfirmationEmail(savedOrder);
         return orderMapper.toDTO(savedOrder);
     }
 

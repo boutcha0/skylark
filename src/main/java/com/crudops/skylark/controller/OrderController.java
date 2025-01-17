@@ -44,7 +44,7 @@ public class OrderController {
             OrderDTO order = orderService.getOrderById(id);
             return ResponseEntity.ok(order);
         } catch (OrderNotFoundException e) {
-            throw e; // Let the exception handler deal with it
+            throw e;
         }
     }
 
