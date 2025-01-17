@@ -22,7 +22,6 @@ public class EmailService {
         emailBody.append("Thank you for your order!\n\n");
         emailBody.append("Order Details:\n");
         emailBody.append("Order Number: ").append(order.getId()).append("\n");
-        emailBody.append("Order Date: ").append(order.getOrderDate()).append("\n\n");
 
         emailBody.append("Items:\n");
         for (OrderItem item : order.getOrderItems()) {
@@ -44,7 +43,7 @@ public class EmailService {
             emailBody.append(order.getShippingAddress().getCountry());
         }
 
-        emailBody.append("\n\nIf you have any questions, please contact us.");
+        emailBody.append("\n\nThank You for the purchase!\n");
 
         message.setText(emailBody.toString());
         mailSender.send(message);
