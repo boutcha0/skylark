@@ -35,7 +35,7 @@
             margin: 10px 0;
         }
         .logo {
-            max-width: 150px;
+            max-width: 60px;
             display: block;
             margin: 0 auto 20px;
         }
@@ -65,12 +65,15 @@
             font-weight: bold;
             color: #2c3e50;
         }
+        .item-quantity {
+            font-weight: bold;
+            color: #2c3e50;
+        }
         .total {
             background-color: #f8f9fa;
-            padding: 20px;
-            border-radius: 6px;
+            padding: 10px;
             margin-top: 20px;
-            text-align: right;
+            text-align: left;
         }
         .total span {
             font-size: 20px;
@@ -97,6 +100,7 @@
     </style>
 </head>
 <body>
+<div class="" >
 <div class="container">
     <div class="header">
         <img src="https://yt3.ggpht.com/a/AATXAJw4KRBkKXAdfcyxff_JqzaYD57r_doVzlKsnA=s900-c-k-c0xffffffff-no-rj-mo" alt="Dickies Logo" class="logo">
@@ -110,21 +114,28 @@
         <h3>Order Summary</h3>
         <ul>
             <li th:each="item : ${order.orderItems}">
-                <div class="item-details">
-                    <span th:text="${item.product.name}"></span>
-                    <br>
-                    <medium>Quantity: <span th:text="${item.quantity}"></span></medium>
-                </div>
-                <div class="item-price">
-                    <span th:text="${#numbers.formatDecimal(item.totalAmount, 1, 2)}"></span>
+                <div class="item" >
+                    <img th:src="${item.product.image}" alt="Product Image" style="width: 50px; height: 50px; margin-right: 10px;">
+                    <div class="item-details">
+                        <div class="product-name" >
+                            <span th:text="${item.product.name}"></span>
+                        </div>
+                        <div class="item-price">
+                            Price : <span th:text="${#numbers.formatDecimal(item.totalAmount, 1, 2)}"></span>$
+                        </div>
+                        <div class="item-quantity">
+                            Quantity: <span th:text="${item.quantity}"></span>
+                        </div>
+                    </div>
                 </div>
             </li>
         </ul>
     </div>
 
-    <div class="total">
-        Total Amount: $<span th:text="${#numbers.formatDecimal(order.totalAmount, 1, 2)}"></span>
+    <div class="total" style="font-weight: bold; font-size: 1.5em; margin-top: 20px;">
+        Total Amount: <span th:text="${#numbers.formatDecimal(order.totalAmount, 1, 2)}"></span>$
     </div>
+
 
     <div class="shipping-address" th:if="${order.shippingAddress != null}">
         <h3>Shipping Address</h3>
@@ -140,6 +151,7 @@
     <div class="footer">
         <p>If you have any questions about your order, please don't hesitate to contact us.</p>
     </div>
+</div>
 </div>
 </body>
 </html>
