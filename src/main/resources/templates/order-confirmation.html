@@ -34,6 +34,11 @@
             font-size: 16px;
             margin: 10px 0;
         }
+        .logo {
+            max-width: 150px;
+            display: block;
+            margin: 0 auto 20px;
+        }
         .item-list {
             margin: 25px 0;
         }
@@ -54,7 +59,7 @@
             align-items: center;
         }
         .item-details {
-            flex: 1;
+            flex: 2;
         }
         .item-price {
             font-weight: bold;
@@ -94,8 +99,9 @@
 <body>
 <div class="container">
     <div class="header">
+        <img src="https://yt3.ggpht.com/a/AATXAJw4KRBkKXAdfcyxff_JqzaYD57r_doVzlKsnA=s900-c-k-c0xffffffff-no-rj-mo" alt="Dickies Logo" class="logo">
         <h1>Order Confirmation</h1>
-        <p class="order-number">Order #<span th:text="${order.id}"></span></p>
+        <p class="order-number">Order Number <span th:text="${order.id}"></span></p>
     </div>
 
     <p>Thank you for your order! We're currently processing it and will notify you when it ships.</p>
@@ -107,7 +113,7 @@
                 <div class="item-details">
                     <span th:text="${item.product.name}"></span>
                     <br>
-                    <small>Quantity: <span th:text="${item.quantity}"></span></small>
+                    <medium>Quantity: <span th:text="${item.quantity}"></span></medium>
                 </div>
                 <div class="item-price">
                     <span th:text="${#numbers.formatDecimal(item.totalAmount, 1, 2)}"></span>
@@ -132,7 +138,7 @@
     </div>
 
     <div class="footer">
-        <p>If you have any questions about your order, please don't hesitate to contact our customer support team.</p>
+        <p>If you have any questions about your order, please don't hesitate to contact us.</p>
     </div>
 </div>
 </body>
