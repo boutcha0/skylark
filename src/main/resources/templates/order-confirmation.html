@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #f0f0f0;
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            color: #2c3e50;
+            font-size: 24px;
+            margin: 0;
+        }
+        .order-number {
+            color: #7f8c8d;
+            font-size: 16px;
+            margin: 10px 0;
+        }
+        .item-list {
+            margin: 25px 0;
+        }
+        .item-list h3 {
+            color: #2c3e50;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+        .item-list ul {
+            list-style: none;
+            padding: 0;
+        }
+        .item-list li {
+            padding: 15px 0;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .item-details {
+            flex: 1;
+        }
+        .item-price {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .total {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 6px;
+            margin-top: 20px;
+            text-align: right;
+        }
+        .total span {
+            font-size: 20px;
+            color: #2c3e50;
+            font-weight: bold;
+        }
+        .shipping-address {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 6px;
+        }
+        .shipping-address h3 {
+            color: #2c3e50;
+            margin-top: 0;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid #f0f0f0;
+            color: #7f8c8d;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>Order Confirmation</h1>
+        <p class="order-number">Order #<span th:text="${order.id}"></span></p>
+    </div>
+
+    <p>Thank you for your order! We're currently processing it and will notify you when it ships.</p>
+
+    <div class="item-list">
+        <h3>Order Summary</h3>
+        <ul>
+            <li th:each="item : ${order.orderItems}">
+                <div class="item-details">
+                    <span th:text="${item.product.name}"></span>
+                    <br>
+                    <small>Quantity: <span th:text="${item.quantity}"></span></small>
+                </div>
+                <div class="item-price">
+                    <span th:text="${#numbers.formatDecimal(item.totalAmount, 1, 2)}"></span>
+                </div>
+            </li>
+        </ul>
+    </div>
+
+    <div class="total">
+        Total Amount: $<span th:text="${#numbers.formatDecimal(order.totalAmount, 1, 2)}"></span>
+    </div>
+
+    <div class="shipping-address" th:if="${order.shippingAddress != null}">
+        <h3>Shipping Address</h3>
+        <p th:text="${order.shippingAddress.streetAddress}"></p>
+        <p>
+            <span th:text="${order.shippingAddress.city}"></span>,
+            <span th:text="${order.shippingAddress.state}"></span>
+            <span th:text="${order.shippingAddress.postalCode}"></span>
+        </p>
+        <p th:text="${order.shippingAddress.country}"></p>
+    </div>
+
+    <div class="footer">
+        <p>If you have any questions about your order, please don't hesitate to contact our customer support team.</p>
+    </div>
+</div>
+</body>
+</html>

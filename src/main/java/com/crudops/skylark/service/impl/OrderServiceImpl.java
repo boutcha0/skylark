@@ -16,8 +16,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import javax.mail.MessagingException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -78,11 +81,15 @@ public class OrderServiceImpl implements OrderService {
             order.setShippingAddress(createShippingAddress(orderDTO.getShippingAddress(), order));
         }
 
-
         Order savedOrder = orderRepository.save(order);
         syncOrderToStripe(order);
 
-        emailService.sendOrderConfirmationEmail(savedOrder);
+        try {
+            emailService.sendOrderConfirmationEmail(savedOrder);
+        } catch (jakarta.mail.MessagingException e) {
+            throw new RuntimeException("Failed to send order confirmation email", e);
+        }
+
         return orderMapper.toDTO(savedOrder);
     }
 

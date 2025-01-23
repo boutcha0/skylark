@@ -1,11 +1,14 @@
 package com.crudops.skylark.service;
 
 import com.crudops.skylark.model.Order;
-import com.crudops.skylark.model.OrderItem;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.SimpleMailMessage;
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
 
 @Service
 public class EmailService {
@@ -13,39 +16,22 @@ public class EmailService {
     @Autowired
     private JavaMailSender mailSender;
 
-    public void sendOrderConfirmationEmail(Order order) {
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(order.getInfo().getEmail());
-        message.setSubject("Order Confirmation #" + order.getId());
+    @Autowired
+    private TemplateEngine templateEngine;
 
-        StringBuilder emailBody = new StringBuilder();
-        emailBody.append("Thank you for your order!\n\n");
-        emailBody.append("Order Details:\n");
-        emailBody.append("Order Number: ").append(order.getId()).append("\n");
+    public void sendOrderConfirmationEmail(Order order) throws MessagingException {
+        Context context = new Context();
+        context.setVariable("order", order);
 
-        emailBody.append("Items:\n");
-        for (OrderItem item : order.getOrderItems()) {
-            emailBody.append("- ")
-                    .append(item.getProduct().getName())
-                    .append(" (Quantity: ").append(item.getQuantity()).append(")")
-                    .append(" - $").append(String.format("%.2f", item.getTotalAmount()))
-                    .append("\n");
-        }
+        String htmlContent = templateEngine.process("order-confirmation", context);
 
-        emailBody.append("\nTotal Amount: $").append(String.format("%.2f", order.getTotalAmount()));
+        MimeMessage message = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
-        if (order.getShippingAddress() != null) {
-            emailBody.append("\n\nShipping Address:\n");
-            emailBody.append(order.getShippingAddress().getStreetAddress()).append("\n");
-            emailBody.append(order.getShippingAddress().getCity()).append(", ");
-            emailBody.append(order.getShippingAddress().getState()).append(" ");
-            emailBody.append(order.getShippingAddress().getPostalCode()).append("\n");
-            emailBody.append(order.getShippingAddress().getCountry());
-        }
+        helper.setTo(order.getInfo().getEmail());
+        helper.setSubject("Order Confirmation #" + order.getId());
+        helper.setText(htmlContent, true);
 
-        emailBody.append("\n\nThank You for the purchase!\n");
-
-        message.setText(emailBody.toString());
         mailSender.send(message);
     }
 }
