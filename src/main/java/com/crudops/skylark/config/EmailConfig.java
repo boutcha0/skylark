@@ -1,5 +1,6 @@
 package com.crudops.skylark.config;
 
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,6 +18,10 @@ public class EmailConfig {
     @Value("${spring.mail.password}")
     private String password;
 
+    @Getter
+    @Value("${ADMIN_EMAIL}")
+    private String adminEmail;
+
     @Bean
     public JavaMailSender javaMailSender() {
         JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
@@ -32,4 +37,5 @@ public class EmailConfig {
 
         return mailSender;
     }
+
 }

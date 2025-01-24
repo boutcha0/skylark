@@ -53,7 +53,7 @@ public class PaymentRestController {
             PdfDocument pdf = new PdfDocument(writer);
             Document document = new Document(pdf);
 
-            document.add(new Paragraph("SKYLARK")
+            document.add(new Paragraph("Dickies Store")
                     .setTextAlignment(TextAlignment.CENTER)
                     .setFontSize(24)
                     .setBold());
