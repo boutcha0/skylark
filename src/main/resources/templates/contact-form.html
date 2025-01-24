@@ -3,15 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: #f0f2f5;
+        html, body {
+            height: 100%;
             margin: 0;
-            padding: 20px;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
+            background-color: #f0f2f5;
         }
 
         .email-container {
@@ -57,7 +55,7 @@
     <img src="https://yt3.ggpht.com/a/AATXAJw4KRBkKXAdfcyxff_JqzaYD57r_doVzlKsnA=s900-c-k-c0xffffffff-no-rj-mo" alt="Dickies Logo" class="logo">
     <h2>New Contact Form Submission</h2>
     <div class="email-details">
-        <p><strong>From:</strong> <span th:text="${email}">sender@example.com</span></p>
+        <p><strong>From:</strong> <span th:text="${email}"></span></p>
         <p><strong>Subject:</strong> <span th:text="${subject}">Contact Form</span></p>
         <p><strong>Message:</strong></p>
         <p class="message-content" th:text="${message}">Message content</p>
